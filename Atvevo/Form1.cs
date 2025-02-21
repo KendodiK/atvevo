@@ -9,7 +9,7 @@ namespace Atvevo
         public Form1()
         {
             InitializeComponent();
-            var databaseConnection = new DatabaseConnection();
+            var databaseConnection = new DatabaseConnection(true);
         }
     }
 }

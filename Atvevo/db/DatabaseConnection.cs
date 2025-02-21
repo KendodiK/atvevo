@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Atvevo.db
 {
@@ -37,7 +38,8 @@ namespace Atvevo.db
             CreateTables();
             if (withDummyData)
             {
-                InsertDummyData("besz.csv");
+                var path = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", "besz.csv");
+                InsertDummyData(path);
             }
         }
         private string DbConnection()
@@ -59,26 +61,25 @@ namespace Atvevo.db
         private void CreateTables()
         {
             string createSuppliersTable = 
-                "CREATE TABLE IF NOT EXISTS suppliers(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL)";
+                "CREATE TABLE IF NOT EXISTS suppliers(id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
             Execute(_connection, createSuppliersTable);
             string createProductsTable = 
-                "CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL)"; 
+                "CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
             Execute(_connection, createProductsTable);
             string createProductSupplierConnectionsTable =
-                "CREATE TABLE IF NOT EXISTS supplier_product_connection(id INTEGER PRIMARY KEY AUTOINCREMENT, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL)";
+                "CREATE TABLE IF NOT EXISTS supplier_product_connection(id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL);";
             Execute(_connection, createProductSupplierConnectionsTable);
             string createSupplyArrivailsTable =
-                "CREATE TABLE IF NOT EXISTS supply_arrivals(id INTEGER PRIMARY KEY AUTOINCREMENT, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL)";
+                "CREATE TABLE IF NOT EXISTS supply_arrivals(id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             Execute(_connection, createSupplyArrivailsTable);
         }
         public void DatabaseDisconnect()
         {
             _connection.Close();
         }
-        private void InsertDummyData(string csvFileName)
+        private void InsertDummyData(string csvFilePath)
         {
-            //TODO read csv files
-            using (StreamReader sr = new StreamReader(csvFileName))
+            using (StreamReader sr = new StreamReader(csvFilePath))
             {
                 var headers = sr.ReadLine()?.Split(',');
                 var data = sr.ReadLine();
@@ -93,12 +94,11 @@ namespace Atvevo.db
         }
         public void Create(string table, Dictionary<string, string> columns)
         {
-            string databaseData = "";
-            foreach (var data in columns)
-            {
-                databaseData += data.Value + ", ";
-            }
-            string command = $"INSERT INTO {table} VALUES({databaseData})";
+            string keysAsString = columns.Keys.Aggregate("", (current, key) => current + "," + key);
+            keysAsString = keysAsString.TrimStart(',');
+            string valuesAsString = columns.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
+            valuesAsString = valuesAsString.TrimStart(',');
+            string command = $"INSERT INTO {table} ({keysAsString}) VALUES({valuesAsString});";
             try
             {
                 Execute(_connection, command);
