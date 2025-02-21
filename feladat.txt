@@ -1,0 +1,24 @@
+1 átvebvő hely
+különböző beszállítók
+	milyen nap 
+	milyen gyüm. (min. 3)
+bevitel -> a szállítások adatai
+ki -> gombra statisztikák
+
+Terv:
+Adatbázisok:
+Beszállítók
+	-id
+	-név
+	-lakcím
+	-tel. sz.
+	-kód
+Gyümölcs:
+	-id
+	-név
+	-besszállító id
+Leadások:
+	-besz. id
+	-gyüm. id
+	-időpont
+	-mennyiség
