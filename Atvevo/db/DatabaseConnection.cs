@@ -20,8 +20,7 @@ namespace Atvevo.db
                 throw;
             }
             _connection.Open();
-            
-            //create table if not exist
+            CreateTables();
         }
 
         private void Execute(SQLiteConnection connection, string query)
