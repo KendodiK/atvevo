@@ -85,7 +85,7 @@ namespace Atvevo.db
                 while (data != null)
                 {
                     var splitedData = data.Split(',');
-                    Dictionary<string, string> dict = headers?.Zip(data, (first, second) => new { first, second }).ToDictionary();
+                    Dictionary<string, string> dict = headers?.Zip(splitedData, (first, second) => new { first, second }).ToDictionary(x => x.first, x => x.second);
                     Create("suppliers", dict);
                     data = sr.ReadLine();
                 }
