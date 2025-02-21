@@ -6,7 +6,7 @@ namespace Atvevo.db
 {
     public abstract class Database
     {
-        private string _databaseFilename { get; }
+        private string DatabaseFilename { get; }
         public virtual void Create(){}
         public virtual void Read(){}
         public virtual void Update(){}
@@ -14,8 +14,11 @@ namespace Atvevo.db
     }
     public class DatabaseConnection : Database
     {
-        private string _databaseFilename = "atvevo.db";
-        private SQLiteConnection _connection;
+        private string DatabaseFilename
+        {
+            get { return "atvevo.db"; }
+        }
+        private readonly SQLiteConnection _connection;
         public DatabaseConnection(bool withDummyData = false)
         {
             string connectionString = DbConnection();
@@ -38,7 +41,7 @@ namespace Atvevo.db
         private string DbConnection()
         {
             SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
-            builder.DataSource = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", _databaseFilename);
+            builder.DataSource = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", DatabaseFilename);
             builder.Version = 3;
 
             return builder.ToString();
@@ -73,6 +76,10 @@ namespace Atvevo.db
         private void InsertDummyData(string csvFileName)
         {
             //TODO read csv files
+            using (StreamReader sr = new StreamReader(csvFileName))
+            {
+                var headers = sr.ReadLine()?.Split(',');
+            }
         }
         public override void Create()
         {
