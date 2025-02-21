@@ -10,8 +10,14 @@ namespace Atvevo.db
     public class DatabaseConnection
     {
         public static string WorkDir = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db");
+        
         private const string DbName = "Atvevo.db";
         private readonly SQLiteConnection _connection;
+        
+        public SuppliersTable SuppliersTable;
+        public ProductsTable ProductsTable;
+        public SupplyArrivalsTable SupplyArrivalsTable;
+        public SupplierProductConnectionTable SupplierProductConnectionTable;
         public DatabaseConnection(bool withDummyData = false)
         {
             string connectionString = DbConnection();
@@ -25,6 +31,10 @@ namespace Atvevo.db
                 throw;
             }
             _connection.Open();
+            SuppliersTable = new SuppliersTable(this, true); 
+            ProductsTable = new ProductsTable(this);
+            SupplyArrivalsTable = new SupplyArrivalsTable(this);
+            SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
         }
         private string DbConnection()
         {
@@ -42,39 +52,15 @@ namespace Atvevo.db
                 _connection.LogMessage(SQLiteErrorCode.Ok, "Successful query. Affected rows: " + affectedRows);
             }
         }
-        private void CreateTables()
+        private void CreateSuppliersProductsAssociati()
         {
-            string createProductsTable = 
-                "CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
-            Execute(createProductsTable);
             string createProductSupplierConnectionsTable =
                 "CREATE TABLE IF NOT EXISTS supplier_product_connection(id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL);";
             Execute(createProductSupplierConnectionsTable);
-            string createSupplyArrivailsTable =
-                "CREATE TABLE IF NOT EXISTS supply_arrivals(id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
-            Execute(createSupplyArrivailsTable);
         }
         public void DatabaseDisconnect()
         {
             _connection.Close();
-        }
-        public void Create(string table, Dictionary<string, string> columns)
-        {
-            string keysAsString = columns.Keys.Aggregate("", (current, key) => current + "," + key);
-            keysAsString = keysAsString.TrimStart(',');
-            string valuesAsString = columns.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
-            valuesAsString = valuesAsString.TrimStart(',');
-            string command = $"INSERT INTO {table} ({keysAsString}) VALUES({valuesAsString});";
-            try
-            {
-                Execute(command);
-            }
-            catch (Exception e)
-            {
-                _connection.LogMessage(SQLiteErrorCode.Error, $"Failed to insert into table {table}");
-                throw;
-            }
-            //TODO add a functionality so it can handle dummy data with header line not in order
         }
     }
     public class SuppliersTable
@@ -122,7 +108,7 @@ namespace Atvevo.db
         {
             _connection = connection;
             string createSuppliersTable = 
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
@@ -159,7 +145,7 @@ namespace Atvevo.db
         {
             _connection = connection;
             string createSuppliersTable = 
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
@@ -182,6 +168,48 @@ namespace Atvevo.db
                     string valuesAsString = columnsWithValues?.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
                     valuesAsString = valuesAsString?.TrimStart(',');
                     
+                    _connection.Execute($"INSERT INTO {_tableName} ({keysAsString}) VALUES({valuesAsString});");
+                    data = sr.ReadLine();
+                }
+            }
+        }
+    }
+
+    public class SupplierProductConnectionTable
+    {
+        private readonly string _tableName = "supplier_product_connection";
+        private readonly DatabaseConnection _connection;
+
+        public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
+        {
+            _connection = connection;
+            string createSuppliersTable =
+                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
+            _connection.Execute(createSuppliersTable);
+            if (withDummyData)
+            {
+                WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
+            }
+        }
+        private void WithDummyData(string dataFilePath)
+        {
+            using (StreamReader sr = new StreamReader(dataFilePath))
+            {
+                var headers = sr.ReadLine()?.Split(',');
+                var data = sr.ReadLine();
+                while (data != null)
+                {
+                    var splitedData = data.Split(',');
+                    Dictionary<string, string> columnsWithValues = headers
+                        ?.Zip(splitedData, (first, second) => new { first, second })
+                        .ToDictionary(x => x.first, x => x.second);
+
+                    string keysAsString = columnsWithValues?.Keys.Aggregate("", (current, key) => current + "," + key);
+                    keysAsString = keysAsString?.TrimStart(',');
+                    string valuesAsString =
+                        columnsWithValues?.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
+                    valuesAsString = valuesAsString?.TrimStart(',');
+
                     _connection.Execute($"INSERT INTO {_tableName} ({keysAsString}) VALUES({valuesAsString});");
                     data = sr.ReadLine();
                 }
