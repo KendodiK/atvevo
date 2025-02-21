@@ -10,6 +10,7 @@ namespace Atvevo
         {
             InitializeComponent();
             var databaseConnection = new DatabaseConnection(true);
+            FormClosing += (sender, args) => { databaseConnection.DatabaseDisconnect(); };
         }
     }
 }
