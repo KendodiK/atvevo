@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Linq;
 
 namespace Atvevo.db
 {
     public abstract class Database
     {
         private string DatabaseFilename { get; }
-        public virtual void Create(){}
+        public void Create(){}
         public virtual void Read(){}
         public virtual void Update(){}
         public virtual void Delete(){}
@@ -79,12 +81,34 @@ namespace Atvevo.db
             using (StreamReader sr = new StreamReader(csvFileName))
             {
                 var headers = sr.ReadLine()?.Split(',');
+                var data = sr.ReadLine();
+                while (data != null)
+                {
+                    var splitedData = data.Split(',');
+                    Dictionary<string, string> dict = headers?.Zip(data, (first, second) => new { first, second }).ToDictionary();
+                    Create("suppliers", dict);
+                    data = sr.ReadLine();
+                }
             }
         }
-        public override void Create()
+        public void Create(string table, Dictionary<string, string> columns)
         {
-            base.Create();
-            //TODO
+            string databaseData = "";
+            foreach (var data in columns)
+            {
+                databaseData += data.Value + ", ";
+            }
+            string command = $"INSERT INTO {table} VALUES({databaseData})";
+            try
+            {
+                Execute(_connection, command);
+            }
+            catch (Exception e)
+            {
+                _connection.LogMessage(SQLiteErrorCode.Error, $"Failed to insert into table {table}");
+                throw;
+            }
+            //TODO add a functionality so it can handle dummy data with header line not in order
         }
         public override void Read()
         {

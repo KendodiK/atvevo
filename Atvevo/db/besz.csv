@@ -1,4 +1,4 @@
-name,zip_code,county,city,streat,house_num,tel_num,code
+name,post_code,county,city,street,house_number,phone,supplier_code
 Kis Antal,2612,Pest,Kosd,Forgács utca,12,06202341239,BESZ000001
 Horvát József,2626,Pest,Nagymaros,Őz utca,15,06703456289,BESZ000002
 Vígh Márton,2612,Pest,Kosd,Temető utca,8,06702238893,BESZ000003
