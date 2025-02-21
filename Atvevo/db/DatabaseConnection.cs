@@ -1,18 +1,28 @@
 ﻿using System;
 using System.Data.SQLite;
+using System.IO;
 
 namespace Atvevo.db
 {
-    public class DatabaseConnection
+    public abstract class Database
     {
-        private const string DB_NAME = "atvevo.db";
-        private readonly string _connectionString = $"DataSource={DB_NAME};Version=3;";
+        private readonly string DATABASE_FILENAME;
         private readonly SQLiteConnection _connection;
-        public DatabaseConnection()
+        public virtual void Create(){}
+        public virtual void Read(){}
+        public virtual void Update(){}
+        public virtual void Delete(){}
+    }
+    public class DatabaseConnection : Database
+    {
+        private readonly string DATABASE_FILENAME = "atvevo.db";
+        private readonly SQLiteConnection _connection;
+        public DatabaseConnection(bool withDummyData = false)
         {
+            string connectionString = DbConnection();
             try
             {
-                _connection = new SQLiteConnection(_connectionString);
+                _connection = new SQLiteConnection(connectionString);
             }
             catch (Exception e)
             {
@@ -21,14 +31,25 @@ namespace Atvevo.db
             }
             _connection.Open();
             CreateTables();
+            if (withDummyData)
+            {
+                InsertDummyData("besz.csv");
+            }
         }
+        private string DbConnection()
+        {
+            SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
+            builder.DataSource = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", DATABASE_FILENAME);
+            builder.Version = 3;
 
+            return builder.ToString();
+        }
         private void Execute(SQLiteConnection connection, string query)
         {
-            using (var command = new SQLiteCommand(query, _connection))
+            using (var command = new SQLiteCommand(query, connection))
             {
                 var affectedRows = command.ExecuteNonQuery();
-                _connection.LogMessage(SQLiteErrorCode.Ok, "Successful query.");
+                connection.LogMessage(SQLiteErrorCode.Ok, "Successful query. Affected rows: " + affectedRows);
             }
         }
         private void CreateTables()
@@ -49,6 +70,30 @@ namespace Atvevo.db
         public void DatabaseDisconnect()
         {
             _connection.Close();
+        }
+        private void InsertDummyData(string csvFileName)
+        {
+            //TODO read csv files
+        }
+        public override void Create()
+        {
+            base.Create();
+            //TODO
+        }
+        public override void Read()
+        {
+            base.Read();
+            //TODO
+        }
+        public override void Update()
+        {
+            base.Update();
+            //TODO
+        }
+        public override void Delete()
+        {
+            base.Delete();
+            //TODO
         }
     } 
 }
