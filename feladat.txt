@@ -10,13 +10,21 @@ Adatbázisok:
 Beszállítók
 	-id
 	-név
-	-lakcím
+	-zip
+	-megye
+	-város
+	-út/utca
+	-ház sz.
 	-tel. sz.
 	-kód
 Gyümölcs:
 	-id
 	-név
-	-besszállító id
+	-fajta
+	-ár
+Összeköt:
+	-bezs.id
+	-gyüm. id-k
 Leadások:
 	-besz. id
 	-gyüm. id
