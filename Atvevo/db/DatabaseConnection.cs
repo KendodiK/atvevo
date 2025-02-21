@@ -6,8 +6,7 @@ namespace Atvevo.db
 {
     public abstract class Database
     {
-        private readonly string DATABASE_FILENAME;
-        private readonly SQLiteConnection _connection;
+        private string _databaseFilename { get; }
         public virtual void Create(){}
         public virtual void Read(){}
         public virtual void Update(){}
@@ -15,8 +14,8 @@ namespace Atvevo.db
     }
     public class DatabaseConnection : Database
     {
-        private readonly string DATABASE_FILENAME = "atvevo.db";
-        private readonly SQLiteConnection _connection;
+        private string _databaseFilename = "atvevo.db";
+        private SQLiteConnection _connection;
         public DatabaseConnection(bool withDummyData = false)
         {
             string connectionString = DbConnection();
@@ -39,7 +38,7 @@ namespace Atvevo.db
         private string DbConnection()
         {
             SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
-            builder.DataSource = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", DATABASE_FILENAME);
+            builder.DataSource = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db", _databaseFilename);
             builder.Version = 3;
 
             return builder.ToString();
