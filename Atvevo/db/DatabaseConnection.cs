@@ -63,7 +63,6 @@ namespace Atvevo.db
         protected DatabaseConnection _connection;
         protected void WithDummyData(string dataFilePath)
         {
-            
             //TODO: Make it so that if the records are already in the database, don't add them
             using (StreamReader sr = new StreamReader(dataFilePath))
             {
