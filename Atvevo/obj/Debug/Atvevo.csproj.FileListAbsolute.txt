@@ -1,13 +1,7 @@
 B:\Prog\C#\Atvevo\Atvevo\bin\Debug\Atvevo.exe.config
 B:\Prog\C#\Atvevo\Atvevo\bin\Debug\Atvevo.exe
 B:\Prog\C#\Atvevo\Atvevo\bin\Debug\Atvevo.pdb
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\EntityFramework.dll
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\EntityFramework.SqlServer.dll
 B:\Prog\C#\Atvevo\Atvevo\bin\Debug\System.Data.SQLite.dll
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\System.Data.SQLite.EF6.dll
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\System.Data.SQLite.Linq.dll
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\EntityFramework.xml
-B:\Prog\C#\Atvevo\Atvevo\bin\Debug\EntityFramework.SqlServer.xml
 B:\Prog\C#\Atvevo\Atvevo\bin\Debug\System.Data.SQLite.xml
 B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.csproj.AssemblyReference.cache
 B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.Properties.Resources.resources

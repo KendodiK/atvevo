@@ -31,9 +31,9 @@ namespace Atvevo.db
             }
             _connection.Open();
             SuppliersTable = new SuppliersTable(this, withDummyData); 
-            ProductsTable = new ProductsTable(this);
-            SupplyArrivalsTable = new SupplyArrivalsTable(this);
-            SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
+            //ProductsTable = new ProductsTable(this);
+            //SupplyArrivalsTable = new SupplyArrivalsTable(this);
+            //SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
         }
         private string DbConnection()
         {
