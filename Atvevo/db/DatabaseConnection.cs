@@ -44,12 +44,21 @@ namespace Atvevo.db
             };
             return builder.ToString();
         }
-        public void Execute(string query)
+        public void ExecuteWithoutReturn(string query)
         {
             using (var command = new SQLiteCommand(query, _connection))
             {
                 var affectedRows = command.ExecuteNonQuery();
                 _connection.LogMessage(SQLiteErrorCode.Ok, "Successful query. Affected rows: " + affectedRows);
+            }
+        }
+        public object ExecuteWithReturn(string query)
+        {
+            using (var command = new SQLiteCommand(query, _connection))
+            {
+                object result = command.ExecuteScalar();
+                _connection.LogMessage(SQLiteErrorCode.Ok, "Successful query.");
+                return result;
             }
         }
         public void DatabaseDisconnect()
@@ -63,25 +72,32 @@ namespace Atvevo.db
         protected DatabaseConnection _connection;
         protected void WithDummyData(string dataFilePath)
         {
-            //TODO: Make it so that if the records are already in the database, don't add them
-            using (StreamReader sr = new StreamReader(dataFilePath))
+            if (TableEntriesCount() == 0)
             {
-                var headers = sr.ReadLine()?.Split(',');
-                var data = sr.ReadLine();
-                while (data != null)
+                using (StreamReader sr = new StreamReader(dataFilePath))
                 {
-                    var splitData = data.Split(',');
-                    Dictionary<string, string> columnsWithValues = headers?.Zip(splitData, (first, second) => new { first, second }).ToDictionary(x => x.first, x => x.second);
+                    var headers = sr.ReadLine()?.Split(',');
+                    var data = sr.ReadLine();
+                    while (data != null)
+                    {
+                        var splitData = data.Split(',');
+                        Dictionary<string, string> columnsWithValues = headers?.Zip(splitData, (first, second) => new { first, second }).ToDictionary(x => x.first, x => x.second);
                     
-                    string keysAsString = columnsWithValues?.Keys.Aggregate("", (current, key) => current + "," + key);
-                    keysAsString = keysAsString?.TrimStart(',');
-                    string valuesAsString = columnsWithValues?.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
-                    valuesAsString = valuesAsString?.TrimStart(',');
+                        string keysAsString = columnsWithValues?.Keys.Aggregate("", (current, key) => current + "," + key);
+                        keysAsString = keysAsString?.TrimStart(',');
+                        string valuesAsString = columnsWithValues?.Values.Aggregate("", (current, value) => current + ",'" + value + "'");
+                        valuesAsString = valuesAsString?.TrimStart(',');
                     
-                    _connection.Execute($"INSERT INTO {_tableName} ({keysAsString}) VALUES({valuesAsString});");
-                    data = sr.ReadLine();
+                        _connection.ExecuteWithoutReturn($"INSERT INTO {_tableName} ({keysAsString}) VALUES({valuesAsString});");
+                        data = sr.ReadLine();
+                    }
                 }
             }
+        }
+        protected int TableEntriesCount()
+        {
+            var result = _connection.ExecuteWithReturn($"SELECT COUNT(*) FROM {_tableName};");
+            return (int)result;
         }
     }
     public class SuppliersTable : DatabaseTable
@@ -93,7 +109,7 @@ namespace Atvevo.db
             _tableName = TableName;
             string createSuppliersTable = 
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
-            _connection.Execute(createSuppliersTable);
+            _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData)
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
@@ -109,7 +125,7 @@ namespace Atvevo.db
             _tableName = TableName;
             string createSuppliersTable = 
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
-            _connection.Execute(createSuppliersTable);
+            _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData)
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
@@ -124,7 +140,7 @@ namespace Atvevo.db
             _connection = connection;
             string createSuppliersTable = 
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
-            _connection.Execute(createSuppliersTable);
+            _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData)
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
@@ -139,7 +155,7 @@ namespace Atvevo.db
             _connection = connection;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
-            _connection.Execute(createSuppliersTable);
+            _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData)
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
