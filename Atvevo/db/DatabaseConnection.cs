@@ -70,8 +70,8 @@ namespace Atvevo.db
                 var data = sr.ReadLine();
                 while (data != null)
                 {
-                    var splitedData = data.Split(',');
-                    Dictionary<string, string> columnsWithValues = headers?.Zip(splitedData, (first, second) => new { first, second }).ToDictionary(x => x.first, x => x.second);
+                    var splitData = data.Split(',');
+                    Dictionary<string, string> columnsWithValues = headers?.Zip(splitData, (first, second) => new { first, second }).ToDictionary(x => x.first, x => x.second);
                     
                     string keysAsString = columnsWithValues?.Keys.Aggregate("", (current, key) => current + "," + key);
                     keysAsString = keysAsString?.TrimStart(',');
@@ -85,14 +85,14 @@ namespace Atvevo.db
         }
     }
     public class SuppliersTable : DatabaseTable
-    {
-        private new readonly string _tableName = "suppliers";
-        private new readonly DatabaseConnection _connection;
+    { 
+        private const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
+            _tableName = TableName;
             string createSuppliersTable = 
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
@@ -102,13 +102,13 @@ namespace Atvevo.db
     }
     public class ProductsTable : DatabaseTable
     {
-        private new readonly string _tableName = "products";
-        private new readonly DatabaseConnection _connection;
+        private const string TableName = "products";
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
+            _tableName = TableName;
             string createSuppliersTable = 
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL);"; 
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
@@ -118,13 +118,12 @@ namespace Atvevo.db
     }
     public class SupplyArrivalsTable : DatabaseTable
     {
-        private new readonly string _tableName = "products";
-        private new readonly DatabaseConnection _connection;
+        private const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
             string createSuppliersTable = 
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
@@ -134,13 +133,12 @@ namespace Atvevo.db
     }
     public class SupplierProductConnectionTable : DatabaseTable
     {
-        private new readonly string _tableName = "supplier_product_connection";
-        private new readonly DatabaseConnection _connection;
+        private const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
             string createSuppliersTable =
-                $"CREATE TABLE IF NOT EXISTS {_tableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.Execute(createSuppliersTable);
             if (withDummyData)
             {
