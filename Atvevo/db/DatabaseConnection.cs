@@ -31,9 +31,9 @@ namespace Atvevo.db
             }
             _connection.Open();
             SuppliersTable = new SuppliersTable(this, withDummyData); 
-            //ProductsTable = new ProductsTable(this);
-            //SupplyArrivalsTable = new SupplyArrivalsTable(this);
-            //SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
+            ProductsTable = new ProductsTable(this);
+            SupplyArrivalsTable = new SupplyArrivalsTable(this);
+            SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
         }
         private string DbConnection()
         {
@@ -97,7 +97,7 @@ namespace Atvevo.db
         protected int TableEntriesCount()
         {
             var result = _connection.ExecuteWithReturn($"SELECT COUNT(*) FROM {_tableName};");
-            return (int)result;
+            return Convert.ToInt32(result);
         }
     }
     public class SuppliersTable : DatabaseTable
