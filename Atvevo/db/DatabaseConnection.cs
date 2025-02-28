@@ -105,7 +105,7 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            Id, Name, PostCode, County, City, Street, HouseNumber, Phone, SupplierCode 
+            id, name, post_code, county, city, street, house_number, phone, supplier_code 
         }
         private const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
@@ -136,7 +136,7 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            Id, Name, Category, Price
+            id, name, category, price
         }
         private const string TableName = "products";
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false)
@@ -167,7 +167,7 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            Id, SupplierId, ProductId, ArrivalTime, Quantity
+            id, supplier_id, product_id, arrival_time, quantity
         }
         private const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false)
@@ -197,7 +197,7 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            Id, SupplierId, ProductId
+            id, supplier_id, product_id
         }
         private const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
