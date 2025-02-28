@@ -52,7 +52,7 @@ namespace Atvevo.db
                 _connection.LogMessage(SQLiteErrorCode.Ok, "Successful query. Affected rows: " + affectedRows);
             }
         }
-        public object ExecuteWithReturn(string query)
+        public object ExecuteWithSingleReturn(string query)
         {
             using (var command = new SQLiteCommand(query, _connection))
             {
@@ -96,12 +96,13 @@ namespace Atvevo.db
         }
         protected int TableEntriesCount()
         {
-            var result = _connection.ExecuteWithReturn($"SELECT COUNT(*) FROM {_tableName};");
+            var result = _connection.ExecuteWithSingleReturn($"SELECT COUNT(*) FROM {_tableName};");
             return Convert.ToInt32(result);
         }
+        public abstract Dictionary<string, string>[] Read();
     }
     public class SuppliersTable : DatabaseTable
-    { 
+    {
         private const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -114,6 +115,10 @@ namespace Atvevo.db
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
             }
+        }
+        public override Dictionary<string, string>[] Read()
+        {
+            return Array.Empty<Dictionary<string, string>>();
         }
     }
     public class ProductsTable : DatabaseTable
@@ -131,6 +136,10 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
+        public override Dictionary<string, string>[] Read()
+        {
+            return Array.Empty<Dictionary<string, string>>();
+        }
     }
     public class SupplyArrivalsTable : DatabaseTable
     {
@@ -146,6 +155,10 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
+        public override Dictionary<string, string>[] Read()
+        {
+            return Array.Empty<Dictionary<string, string>>();
+        }
     }
     public class SupplierProductConnectionTable : DatabaseTable
     {
@@ -160,6 +173,10 @@ namespace Atvevo.db
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
+        }
+        public override Dictionary<string, string>[] Read()
+        {
+            return Array.Empty<Dictionary<string, string>>();
         }
     }
 }
