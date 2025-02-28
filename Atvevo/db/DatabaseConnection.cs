@@ -124,8 +124,21 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            id, name, post_code, county, city, street, house_number, phone, supplier_code 
+            Id, Name, PostCode, County, City, Street, HouseNumber, Phone, SupplierCode 
         }
+
+        private readonly Dictionary<TableColumns, string> _tableColumnNames = new Dictionary<TableColumns, string>()
+        {
+            { TableColumns.Id, "id" },
+            { TableColumns.Name, "name" },
+            { TableColumns.PostCode, "post_code" },
+            { TableColumns.County, "county" },
+            { TableColumns.City, "city" },
+            { TableColumns.Street, "street" },
+            { TableColumns.HouseNumber, "house_number" },
+            { TableColumns.Phone, "phone" },
+            { TableColumns.SupplierCode, "supplier_code" },
+        };
         private const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -155,8 +168,15 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            id, name, category, price
+            Id, Name, Category, Price
         }
+        private readonly Dictionary<TableColumns, string> _tableColumnNames = new Dictionary<TableColumns, string>()
+        {
+            { TableColumns.Id, "id" },
+            { TableColumns.Name, "name" },
+            { TableColumns.Category, "category" },
+            { TableColumns.Price, "price" }
+        };
         private const string TableName = "products";
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -186,8 +206,16 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            id, supplier_id, product_id, arrival_time, quantity
+            Id, SupplierId, ProductId, ArrivalTime, Quantity
         }
+        private readonly Dictionary<TableColumns, string> _tableColumnNames = new Dictionary<TableColumns, string>
+        {
+            { TableColumns.Id, "id" },
+            { TableColumns.ProductId, "product_id" },
+            { TableColumns.SupplierId, "supplier_id" },
+            { TableColumns.Quantity, "quantity" },
+            { TableColumns.ArrivalTime, "arrival_time" },
+        };
         private const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -228,8 +256,14 @@ namespace Atvevo.db
     {
         public enum TableColumns
         {
-            id, supplier_id, product_id
+            Id, SupplierId, ProductId
         }
+        private readonly Dictionary<TableColumns, string> _tableColumnNames = new Dictionary<TableColumns, string>
+        {
+            { TableColumns.Id, "id" },
+            { TableColumns.ProductId, "product_id" },
+            { TableColumns.SupplierId, "supplier_id" },
+        };
         private const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
         {
