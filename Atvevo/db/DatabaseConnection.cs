@@ -61,6 +61,14 @@ namespace Atvevo.db
                 return result;
             }
         }
+        public SQLiteDataReader ExecuteWithMultipleReturn(string query)
+        {
+            using (var command = new SQLiteCommand(query, _connection))
+            {
+                SQLiteDataReader reader = command.ExecuteReader();
+                return reader;
+            }
+        }
         public void DatabaseDisconnect()
         {
             _connection.Close();
@@ -99,7 +107,18 @@ namespace Atvevo.db
             var result = _connection.ExecuteWithSingleReturn($"SELECT COUNT(*) FROM {_tableName};");
             return Convert.ToInt32(result);
         }
-        public abstract Dictionary<string, string>[] Read(List<Enum> requiredColumns);
+        protected string ReadQueryBuilder(Enum[] requiredColumns)
+        {
+            var result = "SELECT";
+            foreach (var column in requiredColumns)
+            {
+                result += " " + column.ToString() + ",";
+            }
+            result = result.TrimEnd(',');
+            result += "FROM " + _tableName + ";";
+            return result;
+        }
+        public abstract Dictionary<string, string>[] Read(Enum[] requiredColumns);
     }
     public class SuppliersTable : DatabaseTable
     {
@@ -120,7 +139,7 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
             }
         }
-        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
+        public override Dictionary<string, string>[] Read(Enum[] requiredColumns)
         {
             if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
             {
@@ -151,7 +170,7 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
+        public override Dictionary<string, string>[] Read(Enum[] requiredColumns)
         {
             if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
             {
@@ -181,16 +200,28 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
+        public override Dictionary<string, string>[] Read(Enum[] requiredColumns)
         {
             if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
             {
-                return Array.Empty<Dictionary<string, string>>();
+                if (TableEntriesCount() == 0)
+                {
+                    return Array.Empty<Dictionary<string, string>>();
+                }
+                List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
+                var queryResult = _connection.ExecuteWithMultipleReturn(ReadQueryBuilder(requiredColumns));
+                while (queryResult.Read())
+                {
+                    Dictionary<string, string> values = new Dictionary<string, string>(requiredColumns.Length);
+                    for (int i = 0; i < requiredColumns.Length; i++)
+                    {
+                        values.Add(requiredColumns[i].ToString(), queryResult.GetString(i));
+                    }
+                    result.Add(values);
+                }
+                return result.ToArray();
             }
-            else
-            {
-                throw new ArgumentException("Argument is of incorrect type");
-            }
+            throw new ArgumentException("Argument is of incorrect type");
         }
     }
     public class SupplierProductConnectionTable : DatabaseTable
@@ -211,7 +242,7 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
+        public override Dictionary<string, string>[] Read(Enum[] requiredColumns)
         {
             if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
             {
