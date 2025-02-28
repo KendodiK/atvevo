@@ -68,7 +68,6 @@ namespace Atvevo.db
                 return result;
             }
         }
-
         public SQLiteDataReader ExecuteWithMultipleReturn(string query)
         {
             using (var command = new SQLiteCommand(query, _connection))
@@ -77,7 +76,6 @@ namespace Atvevo.db
                 return reader;
             }
         }
-
         public void DatabaseDisconnect()
         {
             _connection.Close();
@@ -131,7 +129,7 @@ namespace Atvevo.db
                 result += " " + column + ",";
             }
             result = result.TrimEnd(',');
-            result += "FROM " + _tableName + ";";
+            result += " FROM " + _tableName + ";";
             return result;
         }
         public Dictionary<string, string>[] Read(string[] requiredColumns)
@@ -147,7 +145,7 @@ namespace Atvevo.db
                 Dictionary<string, string> values = new Dictionary<string, string>(requiredColumns.Length);
                 for (int i = 0; i < requiredColumns.Length; i++)
                 {
-                    values.Add(requiredColumns[i], queryResult.GetString(i));
+                    values.Add(requiredColumns[i], queryResult.GetValue(i).ToString());
                 }
                 result.Add(values);
             }
