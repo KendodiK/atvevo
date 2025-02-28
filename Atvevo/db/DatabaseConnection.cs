@@ -99,10 +99,14 @@ namespace Atvevo.db
             var result = _connection.ExecuteWithSingleReturn($"SELECT COUNT(*) FROM {_tableName};");
             return Convert.ToInt32(result);
         }
-        public abstract Dictionary<string, string>[] Read();
+        public abstract Dictionary<string, string>[] Read(List<Enum> requiredColumns);
     }
     public class SuppliersTable : DatabaseTable
     {
+        public enum TableColumns
+        {
+            Id, Name, PostCode, County, City, Street, HouseNumber, Phone, SupplierCode 
+        }
         private const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -116,13 +120,24 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
             }
         }
-        public override Dictionary<string, string>[] Read()
+        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
         {
-            return Array.Empty<Dictionary<string, string>>();
+            if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
+            {
+                return Array.Empty<Dictionary<string, string>>();
+            }
+            else
+            {
+                throw new ArgumentException("Argument is of incorrect type");
+            }
         }
     }
     public class ProductsTable : DatabaseTable
     {
+        public enum TableColumns
+        {
+            Id, Name, Category, Price
+        }
         private const string TableName = "products";
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -136,13 +151,24 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read()
+        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
         {
-            return Array.Empty<Dictionary<string, string>>();
+            if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
+            {
+                return Array.Empty<Dictionary<string, string>>();
+            }
+            else
+            {
+                throw new ArgumentException("Argument is of incorrect type");
+            }
         }
     }
     public class SupplyArrivalsTable : DatabaseTable
     {
+        public enum TableColumns
+        {
+            Id, SupplierId, ProductId, ArrivalTime, Quantity
+        }
         private const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false)
         {
@@ -155,28 +181,46 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read()
+        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
         {
-            return Array.Empty<Dictionary<string, string>>();
+            if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
+            {
+                return Array.Empty<Dictionary<string, string>>();
+            }
+            else
+            {
+                throw new ArgumentException("Argument is of incorrect type");
+            }
         }
     }
     public class SupplierProductConnectionTable : DatabaseTable
     {
+        public enum TableColumns
+        {
+            Id, SupplierId, ProductId
+        }
         private const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
             string createSuppliersTable =
-                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData)
             {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
-        public override Dictionary<string, string>[] Read()
+        public override Dictionary<string, string>[] Read(List<Enum> requiredColumns)
         {
-            return Array.Empty<Dictionary<string, string>>();
+            if (requiredColumns.All(x => x.GetType() == typeof(TableColumns)))
+            {
+                return Array.Empty<Dictionary<string, string>>();
+            }
+            else
+            {
+                throw new ArgumentException("Argument is of incorrect type");
+            }
         }
     }
 }
