@@ -10,3 +10,15 @@ B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.csproj.CoreCompileInputs.cache
 B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.csproj.Up2Date
 B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.exe
 B:\Prog\C#\Atvevo\Atvevo\obj\Debug\Atvevo.pdb
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\bin\Debug\Atvevo.exe.config
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\bin\Debug\Atvevo.exe
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\bin\Debug\Atvevo.pdb
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\bin\Debug\System.Data.SQLite.dll
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\bin\Debug\System.Data.SQLite.xml
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.csproj.AssemblyReference.cache
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.Properties.Resources.resources
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.csproj.GenerateResource.cache
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.csproj.CoreCompileInputs.cache
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.csproj.CopyComplete
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.exe
+C:\Users\admin\Desktop\mappák\2024-25\Juhász Zita\atvevo\Atvevo\obj\Debug\Atvevo.pdb
