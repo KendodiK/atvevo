@@ -197,8 +197,8 @@ namespace Atvevo.db {
             }
         }
         public Product[] GetBySupplier(Supplier supplier) {
-            var query = "SELECT";
-            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE supplier_id = {supplier.Id};");
+            var query = $"SELECT p.id, p.name, p.category, p.price FROM products AS p INNER JOIN supplier_product_connections spc ON p.id = spc.product_id AND spc.supplier_id = {supplier.Id};";
+            var queryResult = _connection.ExecuteWithMultipleReturn(query);
             List<Product> result = new List<Product>();
             while (queryResult.Read()) {
                 Dictionary<string, string> values = new Dictionary<string, string>();
@@ -247,6 +247,7 @@ namespace Atvevo.db {
     public class SupplierProductConnectionTable : DatabaseTable<SupplierProductConnection> {
         public const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false) {
+            _tableName = TableName;
             _connection = connection;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL);";
