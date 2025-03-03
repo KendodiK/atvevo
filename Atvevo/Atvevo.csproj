@@ -50,6 +50,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="db\DatabaseConnection.cs" />
+        <Compile Include="db\Models.cs" />
         <Compile Include="MainWindow.cs">
             <SubType>Form</SubType>
         </Compile>
@@ -90,7 +91,6 @@
       <ClInclude Include="db\sqlite\sqlite3ext.h" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include=".gitignore" />
       <Content Include="db\besz.csv" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>

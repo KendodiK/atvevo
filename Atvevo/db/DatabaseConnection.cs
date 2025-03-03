@@ -127,9 +127,11 @@ namespace Atvevo.db
         }
         public abstract TClass[] Read();
     }
+
     public class SuppliersTable : DatabaseTable<Supplier>
     {
         private const string TableName = "suppliers";
+
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
@@ -142,6 +144,7 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
             }
         }
+
         public override Supplier[] Read()
         {
             if (TableEntriesCount() == 0)
@@ -157,7 +160,8 @@ namespace Atvevo.db
                 {
                     values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
                 }
-                result.Add(new Supplier{
+                result.Add(new Supplier
+                {
                     Id = Convert.ToInt32(values["id"]),
                     Name = values["name"],
                     City = values["city"],
@@ -175,6 +179,7 @@ namespace Atvevo.db
     public class ProductsTable : DatabaseTable<Product>
     {
         private const string TableName = "products";
+
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
@@ -189,12 +194,35 @@ namespace Atvevo.db
         }
         public override Product[] Read()
         {
-            return Array.Empty<Product>();
+            if (TableEntriesCount() == 0)
+            {
+                return Array.Empty<Product>();
+            }
+            List<Product> result = new List<Product>();
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName}");
+            while (queryResult.Read())
+            {
+                Dictionary<string, string> values = new Dictionary<string, string>();
+                for (int i = 0; i < typeof(Supplier).GetProperties().Length; i++)
+                {
+                    values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
+                }
+                result.Add(new Product()
+                {
+                    Id = Convert.ToInt32(values["id"]),
+                    Name = values["name"],
+                    Category = values["category"],
+                    Price = Convert.ToDouble(values["price"]),
+                });
+            }
+            return result.ToArray();
         }
     }
+
     public class SupplyArrivalsTable : DatabaseTable<SupplyArrival>
     {
         private const string TableName = "supply_arrivals";
+
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
@@ -206,14 +234,17 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
+
         public override SupplyArrival[] Read()
         {
             return Array.Empty<SupplyArrival>();
         }
     }
+
     public class SupplierProductConnectionTable : DatabaseTable<SupplierProductConnection>
     {
         private const string TableName = "supplier_product_connections";
+
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false)
         {
             _connection = connection;
@@ -225,6 +256,7 @@ namespace Atvevo.db
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
             }
         }
+
         public override SupplierProductConnection[] Read()
         {
             return Array.Empty<SupplierProductConnection>();
