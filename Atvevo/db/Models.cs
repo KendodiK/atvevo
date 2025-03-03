@@ -11,7 +11,7 @@ namespace Atvevo.db
         public string City { get; set; }
         public string Street { get; set; }
         public byte HouseNumber { get; set; }
-        public int Phone { get; set; }
+        public string Phone { get; set; }
         public string Code { get; set; }
     }
     public class Product

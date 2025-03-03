@@ -104,7 +104,7 @@ namespace Atvevo.db {
             _connection = connection;
             _tableName = TableName;
             string createSuppliersTable =
-                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone INTEGER NOT NULL,supplier_code TEXT NOT NULL);";
+                $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, name TEXT NOT NULL, post_code INTEGER NOT NULL, county TEXT NOT NULL, city TEXT NOT NULL, street TEXT NOT NULL, house_number INTEGER NOT NULL, phone TEXT NOT NULL,supplier_code TEXT NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData) {
                 WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "besz.csv"));
@@ -129,7 +129,7 @@ namespace Atvevo.db {
                     Street = values["street"],
                     HouseNumber = Convert.ToByte(values["house_number"]),
                     ZipCode = values["post_code"],
-                    Phone = Convert.ToInt32(values["phone"]),
+                    Phone = values["phone"],
                     Code = values["supplier_code"],
                 });
             }
