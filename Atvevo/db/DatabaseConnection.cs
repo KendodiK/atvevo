@@ -30,7 +30,7 @@ namespace Atvevo.db {
             SuppliersTable = new SuppliersTable(this, withDummyData);
             ProductsTable = new ProductsTable(this, withDummyData);
             SupplyArrivalsTable = new SupplyArrivalsTable(this);
-            SupplierProductConnectionTable = new SupplierProductConnectionTable(this);
+            SupplierProductConnectionTable = new SupplierProductConnectionTable(this, withDummyData);
         }
         private string DbConnection() {
             SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder {
@@ -96,10 +96,10 @@ namespace Atvevo.db {
             return Convert.ToInt32(result);
         }
         public abstract TClass[] Read();
-        public abstract bool Create(TClass model);
+        public abstract bool Insert(TClass model);
     }
     public class SuppliersTable : DatabaseTable<Supplier> {
-        private const string TableName = "suppliers";
+        public const string TableName = "suppliers";
         public SuppliersTable(DatabaseConnection connection, bool withDummyData = false) {
             _connection = connection;
             _tableName = TableName;
@@ -135,7 +135,7 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public override bool Create(Supplier model) {
+        public override bool Insert(Supplier model) {
             string[] keys = {"name", "post_code", "county", "city", "street", "house_number", "phone", "supplier_code"};
             string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
             
@@ -151,7 +151,7 @@ namespace Atvevo.db {
         }
     }
     public class ProductsTable : DatabaseTable<Product> {
-        private const string TableName = "products";
+        public const string TableName = "products";
         public ProductsTable(DatabaseConnection connection, bool withDummyData = false) {
             _connection = connection;
             _tableName = TableName;
@@ -182,7 +182,7 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public override bool Create(Product model) {
+        public override bool Insert(Product model) {
             string[] keys = {"name", "category", "price"};
             string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
             
@@ -196,9 +196,27 @@ namespace Atvevo.db {
                 return false;
             }
         }
+        public Product[] GetBySupplier(Supplier supplier) {
+            var query = "SELECT";
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE supplier_id = {supplier.Id};");
+            List<Product> result = new List<Product>();
+            while (queryResult.Read()) {
+                Dictionary<string, string> values = new Dictionary<string, string>();
+                for (int i = 0; i < typeof(Supplier).GetProperties().Length; i++) {
+                    values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
+                }
+                result.Add(new Product {
+                    Id = Convert.ToInt32(values["id"]),
+                    Category = values["category"],
+                    Name = values["name"],
+                    Price = Convert.ToDouble(values["price"])
+                });
+            }
+            return result.ToArray();
+        }
     }
     public class SupplyArrivalsTable : DatabaseTable<SupplyArrival> {
-        private const string TableName = "supply_arrivals";
+        public const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false) {
             _connection = connection;
             string createSuppliersTable =
@@ -211,7 +229,7 @@ namespace Atvevo.db {
         public override SupplyArrival[] Read() {
             return Array.Empty<SupplyArrival>();
         }
-        public override bool Create(SupplyArrival model) {
+        public override bool Insert(SupplyArrival model) {
             string[] keys = {"supplier_id", "product_id", "arrival_time", "quantity"};
             string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
             
@@ -227,20 +245,20 @@ namespace Atvevo.db {
         }
     }
     public class SupplierProductConnectionTable : DatabaseTable<SupplierProductConnection> {
-        private const string TableName = "supplier_product_connections";
+        public const string TableName = "supplier_product_connections";
         public SupplierProductConnectionTable(DatabaseConnection connection, bool withDummyData = false) {
             _connection = connection;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
             if (withDummyData) {
-                WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
+                WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "kot.csv"));
             }
         }
         public override SupplierProductConnection[] Read() {
             return Array.Empty<SupplierProductConnection>();
         }
-        public override bool Create(SupplierProductConnection model) {
+        public override bool Insert(SupplierProductConnection model) {
             string[] keys = { "supplier_id", "product_id" };
             string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
 
