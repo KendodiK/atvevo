@@ -97,6 +97,7 @@ namespace Atvevo.db {
         }
         public abstract TClass[] Read();
         public abstract bool Insert(TClass model);
+        public abstract bool Delete(TClass model);
     }
     public class SuppliersTable : DatabaseTable<Supplier> {
         public const string TableName = "suppliers";
@@ -146,6 +147,18 @@ namespace Atvevo.db {
                 _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
                 return true;
             } catch (Exception e) {
+                return false;
+            }
+        }
+        public override bool Delete(Supplier model) {
+            var qDelete = $"DELETE FROM {TableName} WHERE id = {model.Id};";
+            var qConnectionDelete = $"DELETE FROM {SupplierProductConnectionTable.TableName} WHERE supplier_id = {model.Id};";
+            try {
+                _connection.ExecuteWithoutReturn(qDelete);
+                _connection.ExecuteWithoutReturn(qConnectionDelete);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
@@ -214,6 +227,18 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
+        public override bool Delete(Product model) {
+            var qDelete = $"DELETE FROM {TableName} WHERE id = {model.Id};";
+            var qConnectionDelete = $"DELETE FROM {SupplierProductConnectionTable.TableName} WHERE product_id = {model.Id};";
+            try {
+                _connection.ExecuteWithoutReturn(qDelete);
+                _connection.ExecuteWithoutReturn(qConnectionDelete);
+                return true;
+            }
+            catch (Exception) {
+                return false;
+            }
+        }
     }
     public class SupplyArrivalsTable : DatabaseTable<SupplyArrival> {
         public const string TableName = "supply_arrivals";
@@ -240,6 +265,16 @@ namespace Atvevo.db {
                 _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
                 return true;
             } catch (Exception e) {
+                return false;
+            }
+        }
+        public override bool Delete(SupplyArrival model) {
+            var query = $"DELETE FROM {TableName} WHERE id = {model.Id}";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
@@ -273,6 +308,16 @@ namespace Atvevo.db {
                 return true;
             }
             catch (Exception e) {
+                return false;
+            }
+        }
+        public override bool Delete(SupplierProductConnection model) {
+            var query = $"DELETE FROM {TableName} WHERE supplier_id = {model.SupplierId} AND product_id = {model.ProductId};";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
