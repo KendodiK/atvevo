@@ -13,18 +13,18 @@ namespace Atvevo
         {
             private int fomLeft { get; set;}
             private int fomTop { get; set;}
-            private int fruitId { get; set;}
+            private Product fruit { get; set;}
             public CheckBox fruitCheckBox { get; set;}
-            private Label fruitName { get; set;}
+            private Label fruitNameLabel { get; set;}
             public NumericUpDown quantity { get; set;}
             
             //public NumericUpDown Quantity { get => quantity.Value; set => quantity = value; }
 
-            public FruitSelectElement(int fomLeft, int fomTop, int fruitId, Panel mainWindow)
+            public FruitSelectElement(int fomLeft, int fomTop, Product fruit, Panel mainWindow)
             {
                 this.fomLeft = fomLeft;
                 this.fomTop = fomTop;
-                this.fruitId = fruitId;
+                this.fruit = fruit;
 
                 this.fruitCheckBox = new CheckBox
                 {
@@ -37,14 +37,14 @@ namespace Atvevo
                 };
                 this.fruitCheckBox.CheckedChanged += (sender, args) => { EnableQuantity(sender, args); };
 
-                this.fruitName = new Label
+                this.fruitNameLabel = new Label
                 {
                     Parent = mainWindow,
                     Width = 100,
                     Height = 30,
                     Top = fomTop,
                     Left = fomLeft + 80,
-                    Text = $"kg Fruit name",
+                    Text = $"kg {fruit.Name}",
                 };
 
                 this.quantity = new NumericUpDown
@@ -71,12 +71,13 @@ namespace Atvevo
         
         private static ComboBox _supplierDropdown;
         private static Panel selectElementsPanel;
-        private static TextBox name;
-        private static TextBox city;
-        private static TextBox zipCode;
-        private static TextBox phone;
-        private static TextBox street;
-        private static TextBox houseNumber;
+        private static TextBox inName;
+        private static TextBox inCity;
+        private static TextBox inZipCode;
+        private static TextBox inPhone;
+        private static TextBox inStreet;
+        private static TextBox inHouseNumber;
+        private static Panel supplierPanel;
         private static Button addSupplierButton;
         private static Button deleteSupplierButton;
         private static Button showListButton;
@@ -97,23 +98,14 @@ namespace Atvevo
 
         static void BuildForm(Form mainWin, DatabaseConnection databaseConnection)
         {
-            _supplierDropdown = new ComboBox
-            {
-                Parent = mainWin,
-                Width = 130,
-                Height = 20,
-                Top = 10,
-                Left = 20,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-            };
-            selectElementsPanel = new Panel
-            {
-                Parent = mainWin,
-                Width = 700,
-                Height = 300,
-                Top = 40,
-                Left = 20,
-            };
+            _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
+            selectElementsPanel = new Panel { Parent = mainWin, Width = 250, Height = 300, Top = 50, Left = 20, AutoScroll = true};
+            int supplierTop = 30;
+            supplierPanel = new Panel { Parent = mainWin, Width = 490, Height = 300, Top = 10, Left = 310, };
+            TextBox name = new TextBox { Parent = supplierPanel, Width = 35, Height = 20, Left = 10, Text = "Név:"};
+            TextBox city = new TextBox { Parent = supplierPanel, Width = 50, Height = 20, Top = supplierTop, Left = 10, Text = "Város:"};
+            TextBox streath = new TextBox { Parent = supplierPanel, Width = 80, Height = 20, Top = supplierTop * (supplierPanel.Controls.Count - 1), Left = 10, Text = "Utca, hsz.:"};
+            TextBox phoneNum = new TextBox { Parent = supplierPanel, Width = 60, Height = 20, Top = supplierTop * (supplierPanel.Controls.Count - 1), Left = 10, Text = "Tel. sz." };
             var suppliers = databaseConnection.SuppliersTable.Read();
             foreach (var supplier in suppliers)
             {
@@ -121,21 +113,19 @@ namespace Atvevo
             }
             _supplierDropdown.SelectedIndexChanged += 
                 (sender, args) => SupplierDropdown_SelectedIndexChanged(
-                    sender, args, mainWin, databaseConnection);
+                    sender, args, databaseConnection, suppliers[_supplierDropdown.SelectedIndex]);
         }
         
-        private static void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, Form senderForm, DatabaseConnection databaseConnection)
+        private static void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
         {
             selectElements.Clear();
             selectElementsPanel.Controls.Clear();
             ComboBox suppliers = (ComboBox)sender;
-            int supplierId = suppliers.SelectedIndex + 1;
-            //adatbázisból lekérni id alapján a lehetséges gyümölcsök id-jét
-            int[] fruitIds = {1, 2, 3, 4};
-            for (int i = 0; i < fruitIds.Length; i++)
+            Product[] fruits = databaseConnection.ProductsTable.GetBySupplier(supplier);
+            for (int i = 0; i < fruits.Length; i++)
             {
                 FruitSelectElement fruitSelectElement = new FruitSelectElement(
-                    10, 60 + i * 30 , fruitIds[i], selectElementsPanel);
+                    10, 60 + i * 30 , fruits[i], selectElementsPanel);
                 selectElements.Add(fruitSelectElement);
             }
         }
