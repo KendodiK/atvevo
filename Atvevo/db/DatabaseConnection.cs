@@ -22,11 +22,10 @@ namespace Atvevo.db {
         private const string DbName = "Atvevo.db";
         private readonly SQLiteConnection _connection;
 
-        public SuppliersTable SuppliersTable;
-        public ProductsTable ProductsTable;
-        public SupplyArrivalsTable SupplyArrivalsTable;
-        public SupplierProductConnectionTable SupplierProductConnectionTable;
-
+        public readonly SuppliersTable SuppliersTable;
+        public readonly ProductsTable ProductsTable;
+        public readonly SupplyArrivalsTable SupplyArrivalsTable;
+        public readonly SupplierProductConnectionTable SupplierProductConnectionTable;
         public DatabaseConnection(bool withDummyData = false) {
             string connectionString = DbConnection();
             try {
@@ -149,16 +148,11 @@ namespace Atvevo.db {
             return result.ToArray();
         }
         public override bool Insert(Supplier model) {
-            string[] keys = {"name", "post_code", "county", "city", "street", "house_number", "phone", "supplier_code"};
-            string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
-            
-            string keysAsString = keys.Aggregate("", (current, key) => current + "," + key).TrimStart(',');
-            string valuesAsString = values.Aggregate("", (current, value) => current + ",'" + value + "'").TrimStart(',');
-
+            string query = $"INSERT INTO {TableName} (name, post_code, county, city, street, house_number, phone, supplier_code) VALUES({model.Name}, {model.ZipCode}, {model.County}, {model.City}, {model.Street}, {model.HouseNumber}, {model.Phone}, {model.Code});";
             try {
-                _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
+                _connection.ExecuteWithoutReturn(query);
                 return true;
-            } catch (Exception e) {
+            } catch (Exception) {
                 return false;
             }
         }
@@ -219,16 +213,11 @@ namespace Atvevo.db {
             return result.ToArray();
         }
         public override bool Insert(Product model) {
-            string[] keys = {"name", "category", "price"};
-            string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
-            
-            string keysAsString = keys.Aggregate("", (current, key) => current + "," + key).TrimStart(',');
-            string valuesAsString = values.Aggregate("", (current, value) => current + ",'" + value + "'").TrimStart(',');
-
+            string query = $"INSERT INTO {TableName} (name, category, price) VALUES({model.Name}, {model.Category}, {model.Price});";
             try {
-                _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
+                _connection.ExecuteWithoutReturn(query);
                 return true;
-            } catch (Exception e) {
+            } catch (Exception) {
                 return false;
             }
         }
@@ -289,16 +278,11 @@ namespace Atvevo.db {
             return Array.Empty<SupplyArrival>();
         }
         public override bool Insert(SupplyArrival model) {
-            string[] keys = {"supplier_id", "product_id", "arrival_time", "quantity"};
-            string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
-            
-            string keysAsString = keys.Aggregate("", (current, key) => current + "," + key).TrimStart(',');
-            string valuesAsString = values.Aggregate("", (current, value) => current + ",'" + value + "'").TrimStart(',');
-
+            string query = $"INSERT INTO {TableName} (supplier_id, product_id, arrival_time, quantity) VALUES({model.SupplierId}, {model.ProductId}, {model.ArrivalTime.ToUnixTimestamp()}, {model.Quantity});";
             try {
-                _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
+                _connection.ExecuteWithoutReturn(query);
                 return true;
-            } catch (Exception e) {
+            } catch (Exception) {
                 return false;
             }
         }
@@ -340,16 +324,9 @@ namespace Atvevo.db {
             return Array.Empty<SupplierProductConnection>(); //TODO
         }
         public override bool Insert(SupplierProductConnection model) {
-            string[] keys = { "supplier_id", "product_id" };
-            string[] values = model.GetType().GetProperties().Select(x => x.GetValue(model).ToString()).ToArray();
-
-            string keysAsString = keys.Aggregate("", (current, key) => current + "," + key).TrimStart(',');
-            string valuesAsString =
-                values.Aggregate("", (current, value) => current + ",'" + value + "'").TrimStart(',');
-
+            string query = $"INSERT INTO {TableName} (supplier_id, product_id) VALUES('{model.SupplierId}', '{model.ProductId}');";
             try {
-                _connection.ExecuteWithoutReturn(
-                    $"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
+                _connection.ExecuteWithoutReturn(query);
                 return true;
             }
             catch (Exception) {
