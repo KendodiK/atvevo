@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -14,9 +15,14 @@ namespace Atvevo
             private int fomLeft { get; set;}
             private int fomTop { get; set;}
             private Product fruit { get; set;}
-            public CheckBox fruitCheckBox { get; set;}
             private Label fruitNameLabel { get; set;}
-            public NumericUpDown quantity { get; set;}
+            private List<(Product, int)> products { get; set;}
+            public CheckBox fruitCheckBox;
+            public NumericUpDown quantity;
+            
+            List<(Product, int)> Products {
+                get => products;
+            }
             
             //public NumericUpDown Quantity { get => quantity.Value; set => quantity = value; }
 
@@ -40,11 +46,11 @@ namespace Atvevo
                 this.fruitNameLabel = new Label
                 {
                     Parent = mainWindow,
-                    Width = 100,
-                    Height = 30,
+                    Width = 300,
+                    Height = 60,
                     Top = fomTop,
                     Left = fomLeft + 80,
-                    Text = $"kg {fruit.Name}",
+                    Text = $"kg {fruit.Name} \n {fruit.Category}",
                 };
 
                 this.quantity = new NumericUpDown
@@ -57,15 +63,22 @@ namespace Atvevo
                     Value = 0,
                     Enabled = false,
                 };
+                this.quantity.ValueChanged += (sender, args) => addProduct(sender, args);
             }
 
             private void EnableQuantity(object sender, EventArgs e)
             {
                 quantity.Enabled = ((CheckBox)sender).Checked;
+                saveButton.Enabled = true;
                 if (!((CheckBox)sender).Checked)
                 {
                     quantity.Value = 0;
                 }
+            }
+
+            private void addProduct(object sender, EventArgs e)
+            {
+                products.Add((fruit, (int)quantity.Value));
             }
         }
         
@@ -77,8 +90,8 @@ namespace Atvevo
         private static TextBox inPhone;
         private static TextBox inStreet;
         private static TextBox inHouseNumber;
-        private static Panel supplierPanel;
         private static Button addSupplierButton;
+        private static Button changeSupplierButton;
         private static Button deleteSupplierButton;
         private static Button showListButton;
         private static Button saveButton;
@@ -99,13 +112,66 @@ namespace Atvevo
         static void BuildForm(Form mainWin, DatabaseConnection databaseConnection)
         {
             _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
-            selectElementsPanel = new Panel { Parent = mainWin, Width = 250, Height = 300, Top = 50, Left = 20, AutoScroll = true};
+            selectElementsPanel = new Panel { Parent = mainWin, Width = 380, Height = 300, Top = 50, Left = 20, };
+            selectElementsPanel.VerticalScroll.Enabled = true;
+            
             int supplierTop = 30;
-            supplierPanel = new Panel { Parent = mainWin, Width = 490, Height = 300, Top = 10, Left = 310, };
-            TextBox name = new TextBox { Parent = supplierPanel, Width = 35, Height = 20, Left = 10, Text = "Név:"};
-            TextBox city = new TextBox { Parent = supplierPanel, Width = 50, Height = 20, Top = supplierTop, Left = 10, Text = "Város:"};
-            TextBox streath = new TextBox { Parent = supplierPanel, Width = 80, Height = 20, Top = supplierTop * (supplierPanel.Controls.Count - 1), Left = 10, Text = "Utca, hsz.:"};
-            TextBox phoneNum = new TextBox { Parent = supplierPanel, Width = 60, Height = 20, Top = supplierTop * (supplierPanel.Controls.Count - 1), Left = 10, Text = "Tel. sz." };
+            Label name = new Label 
+                { Parent = mainWin, Width = 45, Height = 20, Left = 400, Top = 10, Text = "Név:",};
+            Label city = new Label 
+                { Parent = mainWin, Width = 130, Height = 20, Top = supplierTop + 10, Left = 400, Text = "Város, ir. sz.:",};
+            Label streeth = new Label 
+                { Parent = mainWin, Width = 100, Height = 20, Top = supplierTop * 2 + 10, Left = 400, Text = "Utca, hsz.:",};
+            Label phoneNum = new Label 
+                { Parent = mainWin, Width = 80, Height = 20, Top = supplierTop * 3 + 10, Left = 400, Text = "Tel. sz.",};
+
+            int leftCounted = name.Left + name.Width + 10;
+            inName = new TextBox 
+                { Parent = mainWin, Width = 200, Height = 20, Top = 10, Left = leftCounted };
+            leftCounted = city.Left + city.Width + 10;
+            inCity = new TextBox 
+                { Parent = mainWin, Width = 110, Height = 20, Top = supplierTop + 10, Left = leftCounted };
+            leftCounted += inCity.Width + 10;
+            inZipCode = new TextBox 
+                { Parent = mainWin, Width = 50, Height = 20, Top = supplierTop + 10, Left = leftCounted };
+            leftCounted = streeth.Left + streeth.Width + 10;
+            inStreet = new TextBox 
+                { Parent = mainWin, Width = 150, Height = 20, Top = supplierTop * 2 + 10, Left = leftCounted };
+            leftCounted += inStreet.Width + 10;
+            inHouseNumber = new TextBox 
+                { Parent = mainWin, Width = 30, Height = 20, Top = supplierTop * 2 + 10, Left = leftCounted };
+            leftCounted = phoneNum.Left + phoneNum.Width + 10;
+            inPhone = new TextBox 
+                { Parent = mainWin, Width = 200, Height = 20, Top = supplierTop * 3 + 10, Left = leftCounted };
+
+            addSupplierButton = new Button
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 4 + 10, Left = 400, Text = "Beszállító \nhozzáadása",};
+                addSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+                addSupplierButton.Click += (sender, args) => addNewSupplier(sender, args, databaseConnection);
+
+            changeSupplierButton = new Button
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 4 + 10, Left = 510, 
+                    Text = "Beszállító \nmódosítása", Enabled = false
+                };
+                changeSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+                changeSupplierButton.Click += (sender, args) => changeSupplier(sender, args, databaseConnection, _supplierDropdown.SelectedIndex);
+
+            deleteSupplierButton = new Button
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 4 + 10, Left = 620, 
+                    Text = "Beszállító \ntörlése", Enabled = false
+                };
+                deleteSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+
+            showListButton = new Button
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 7, Left = 510, Text = "Lista megjelenítése", };
+                showListButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+                showListButton.Click += (sender, args) => { };
+
+            saveButton = new Button
+                { Parent = mainWin, Width = 150, Height = 30, Top = 360, Left = 400, Text = "Beszállítás mentése", Enabled = false};
+                saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+                    
+                    
             var suppliers = databaseConnection.SuppliersTable.Read();
             foreach (var supplier in suppliers)
             {
@@ -120,14 +186,64 @@ namespace Atvevo
         {
             selectElements.Clear();
             selectElementsPanel.Controls.Clear();
+            addSupplierButton.Enabled = false;
+            changeSupplierButton.Enabled = true;
+            deleteSupplierButton.Enabled = true;
+            deleteSupplierButton.Click += (senderBtn, args) => deleteSupplier(senderBtn, args, databaseConnection, supplier);
             ComboBox suppliers = (ComboBox)sender;
             Product[] fruits = databaseConnection.ProductsTable.GetBySupplier(supplier);
             for (int i = 0; i < fruits.Length; i++)
             {
                 FruitSelectElement fruitSelectElement = new FruitSelectElement(
-                    10, 60 + i * 30 , fruits[i], selectElementsPanel);
+                    10, 60 + i * 60 , fruits[i], selectElementsPanel);
                 selectElements.Add(fruitSelectElement);
             }
+            writeSupplierData(supplier);
+        }
+
+        private static void writeSupplierData(Supplier supplier)
+        {
+            inName.Text = supplier.Name;
+            inCity.Text = supplier.City;
+            inZipCode.Text = supplier.ZipCode;
+            inStreet.Text = supplier.Street;
+            inHouseNumber.Text = supplier.HouseNumber.ToString();
+            inPhone.Text = supplier.Phone;
+        }
+
+        private static void addNewSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection)
+        {
+            if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
+                inHouseNumber.Text == "" || inPhone.Text == "")
+            {
+                MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                Supplier supplier = new Supplier
+                {
+                    Name = inName.Text,
+                    City = inCity.Text,
+                    ZipCode = inZipCode.Text,
+                    Street = inStreet.Text,
+                    HouseNumber = Convert.ToByte(inHouseNumber.Text),
+                    Phone = inPhone.Text,
+                };
+                databaseConnection.SuppliersTable.Insert(supplier);
+                _supplierDropdown.Items.Add(supplier.Name);   
+                _supplierDropdown.SelectedIndex = _supplierDropdown.Items.Count - 1;
+            }
+        }
+
+        private static void changeSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection,
+            int supplierIndex)
+        {
+            //databaseConnection.SuppliersTable. adott id-jű supplier módosítása (opcionálisan: delete-hez hasonlóan áthozni a supplier-t)
+        }
+
+        private static void deleteSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
+        {
+            //databaseConnection.SuppliersTable.Delete(supplier.Id); törlés??
         }
     }
 }
