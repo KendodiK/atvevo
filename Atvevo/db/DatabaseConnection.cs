@@ -5,6 +5,17 @@ using System.IO;
 using System.Linq;
 
 namespace Atvevo.db {
+    public static class DateTimeHelper {
+        public static long ToUnixTimestamp(this DateTime dateTime) {
+            DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+            TimeSpan timeSpan = dateTime - unixEpoch;
+            return (long)timeSpan.TotalSeconds;
+        }
+        public static DateTime FromUnixTimestamp(this long unixTimestamp) {
+            DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+            return unixEpoch.AddSeconds(unixTimestamp);
+        }
+    }
     public class DatabaseConnection {
         public static readonly string WorkDir = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", ".."), "db");
 
@@ -97,6 +108,7 @@ namespace Atvevo.db {
         }
         public abstract TClass[] Read();
         public abstract bool Insert(TClass model);
+        public abstract bool Update(int modifiedId, TClass model);
         public abstract bool Delete(TClass model);
     }
     public class SuppliersTable : DatabaseTable<Supplier> {
@@ -147,6 +159,17 @@ namespace Atvevo.db {
                 _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
                 return true;
             } catch (Exception e) {
+                return false;
+            }
+        }
+        public override bool Update(int modifiedId, Supplier model) {
+            string update = $"name = '{model.Name}', post_code = '{model.ZipCode}', county = {model.County}, city = {model.City}, street = {model.Street}, house_number = {model.HouseNumber}, phone = {model.Phone}, supplier_code = '{model.Code}'";
+            string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id}";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
@@ -227,6 +250,17 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
+        public override bool Update(int modifiedId, Product model) {
+            string update = $"name = '{model.Name}', category = '{model.Category}', price = '{model.Price}'";
+            string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id}";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
+                return false;
+            }
+        }
         public override bool Delete(Product model) {
             var qDelete = $"DELETE FROM {TableName} WHERE id = {model.Id};";
             var qConnectionDelete = $"DELETE FROM {SupplierProductConnectionTable.TableName} WHERE product_id = {model.Id};";
@@ -248,7 +282,7 @@ namespace Atvevo.db {
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
         }
-        public override SupplyArrival[] Read() {
+        public override SupplyArrival[] Read() { //TODO
             if (TableEntriesCount() == 0) {
                 return Array.Empty<SupplyArrival>();
             }
@@ -265,6 +299,17 @@ namespace Atvevo.db {
                 _connection.ExecuteWithoutReturn($"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
                 return true;
             } catch (Exception e) {
+                return false;
+            }
+        }
+        public override bool Update(int modifiedId, SupplyArrival model) {
+            string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}', arrival_time = {model.ArrivalTime.ToUnixTimestamp()}, quantity = {model.Quantity}";
+            string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id};";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
@@ -292,7 +337,7 @@ namespace Atvevo.db {
             }
         }
         public override SupplierProductConnection[] Read() {
-            return Array.Empty<SupplierProductConnection>();
+            return Array.Empty<SupplierProductConnection>(); //TODO
         }
         public override bool Insert(SupplierProductConnection model) {
             string[] keys = { "supplier_id", "product_id" };
@@ -307,7 +352,18 @@ namespace Atvevo.db {
                     $"INSERT INTO {TableName} ({keysAsString}) VALUES({valuesAsString});)");
                 return true;
             }
-            catch (Exception e) {
+            catch (Exception) {
+                return false;
+            }
+        }
+        public override bool Update(int modifiedId, SupplierProductConnection model) {
+            string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}";
+            string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id};";
+            try {
+                _connection.ExecuteWithoutReturn(query);
+                return true;
+            }
+            catch (Exception) {
                 return false;
             }
         }
