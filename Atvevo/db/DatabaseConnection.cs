@@ -215,7 +215,7 @@ namespace Atvevo.db {
             List<Product> result = new List<Product>();
             while (queryResult.Read()) {
                 Dictionary<string, string> values = new Dictionary<string, string>();
-                for (int i = 0; i < typeof(Supplier).GetProperties().Length; i++) {
+                for (int i = 0; i < typeof(Product).GetProperties().Length; i++) {
                     values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
                 }
                 result.Add(new Product {
@@ -242,16 +242,16 @@ namespace Atvevo.db {
     }
     public class SupplyArrivalsTable : DatabaseTable<SupplyArrival> {
         public const string TableName = "supply_arrivals";
-        public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData = false) {
+        public SupplyArrivalsTable(DatabaseConnection connection) {
             _connection = connection;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
-            if (withDummyData) {
-                WithDummyData(Path.Combine(DatabaseConnection.WorkDir, ""));
-            }
         }
         public override SupplyArrival[] Read() {
+            if (TableEntriesCount() == 0) {
+                return Array.Empty<SupplyArrival>();
+            }
             return Array.Empty<SupplyArrival>();
         }
         public override bool Insert(SupplyArrival model) {
