@@ -157,7 +157,7 @@ namespace Atvevo.db {
             }
         }
         public override bool Update(Supplier model) {
-            string update = $"name = '{model.Name}', post_code = '{model.ZipCode}', county = {model.County}, city = {model.City}, street = {model.Street}, house_number = {model.HouseNumber}, phone = {model.Phone}, supplier_code = '{model.Code}'";
+            string update = $"name = '{model.Name}', post_code = '{model.ZipCode}', county = '{model.County}', city = '{model.City}', street = '{model.Street}', house_number = '{model.HouseNumber}', phone = '{model.Phone}', supplier_code = '{model.Code}'";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id}";
             try {
                 _connection.ExecuteWithoutReturn(query);
@@ -213,7 +213,7 @@ namespace Atvevo.db {
             return result.ToArray();
         }
         public override bool Insert(Product model) {
-            string query = $"INSERT INTO {TableName} (name, category, price) VALUES({model.Name}, {model.Category}, {model.Price});";
+            string query = $"INSERT INTO {TableName} (name, category, price) VALUES('{model.Name}', '{model.Category}', '{model.Price}');";
             try {
                 _connection.ExecuteWithoutReturn(query);
                 return true;
@@ -278,7 +278,7 @@ namespace Atvevo.db {
             return Array.Empty<SupplyArrival>();
         }
         public override bool Insert(SupplyArrival model) {
-            string query = $"INSERT INTO {TableName} (supplier_id, product_id, arrival_time, quantity) VALUES({model.SupplierId}, {model.ProductId}, {model.ArrivalTime.ToUnixTimestamp()}, {model.Quantity});";
+            string query = $"INSERT INTO {TableName} (supplier_id, product_id, arrival_time, quantity) VALUES('{model.SupplierId}', '{model.ProductId}', '{model.ArrivalTime.ToUnixTimestamp()}', '{model.Quantity}');";
             try {
                 _connection.ExecuteWithoutReturn(query);
                 return true;
@@ -287,7 +287,7 @@ namespace Atvevo.db {
             }
         }
         public override bool Update(SupplyArrival model) {
-            string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}', arrival_time = {model.ArrivalTime.ToUnixTimestamp()}, quantity = {model.Quantity}";
+            string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}', arrival_time = '{model.ArrivalTime.ToUnixTimestamp()}', quantity = '{model.Quantity}'";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id};";
             try {
                 _connection.ExecuteWithoutReturn(query);
@@ -345,7 +345,7 @@ namespace Atvevo.db {
             }
         }
         public override bool Delete(SupplierProductConnection model) {
-            var query = $"DELETE FROM {TableName} WHERE supplier_id = {model.SupplierId} AND product_id = {model.ProductId};";
+            var query = $"DELETE FROM {TableName} WHERE supplier_id = '{model.SupplierId}' AND product_id = '{model.ProductId}';";
             try {
                 _connection.ExecuteWithoutReturn(query);
                 return true;
