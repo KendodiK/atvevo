@@ -200,7 +200,7 @@ namespace Atvevo.db {
             var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName};");
             while (queryResult.Read()) {
                 Dictionary<string, string> values = new Dictionary<string, string>();
-                for (int i = 0; i < typeof(Supplier).GetProperties().Length; i++) {
+                for (int i = 0; i < typeof(Product).GetProperties().Length; i++) {
                     values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
                 }
                 result.Add(new Product() {
@@ -271,11 +271,45 @@ namespace Atvevo.db {
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
         }
-        public override SupplyArrival[] Read() { //TODO
+        public override SupplyArrival[] Read() {
             if (TableEntriesCount() == 0) {
                 return Array.Empty<SupplyArrival>();
             }
-            return Array.Empty<SupplyArrival>();
+            List<SupplyArrival> result = new List<SupplyArrival>();
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName};");
+            while (queryResult.Read()) {
+                Dictionary<string, string> values = new Dictionary<string, string>();
+                for (int i = 0; i < typeof(SupplyArrival).GetProperties().Length; i++) {
+                    values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
+                }
+                result.Add(new SupplyArrival() {
+                    Id = Convert.ToInt32(values["id"]),
+                    ProductId = Convert.ToInt32(values["product_id"]),
+                    ArrivalTime = Convert.ToInt64(values["arrival_time"]).FromUnixTimestamp(),
+                    Quantity = Convert.ToInt32(values["price"]),
+                });
+            }
+            return result.ToArray();
+        }
+        public SupplyArrival[] GetBySupplierAndArrivalTime(DateTime after) {
+            if (TableEntriesCount() == 0) {
+                return Array.Empty<SupplyArrival>();
+            }
+            List<SupplyArrival> result = new List<SupplyArrival>();
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE arrival_time >= {after};");
+            while (queryResult.Read()) {
+                Dictionary<string, string> values = new Dictionary<string, string>();
+                for (int i = 0; i < typeof(SupplyArrival).GetProperties().Length; i++) {
+                    values.Add(queryResult.GetName(i), queryResult.GetValue(i).ToString());
+                }
+                result.Add(new SupplyArrival() {
+                    Id = Convert.ToInt32(values["id"]),
+                    ProductId = Convert.ToInt32(values["product_id"]),
+                    ArrivalTime = Convert.ToInt64(values["arrival_time"]).FromUnixTimestamp(),
+                    Quantity = Convert.ToInt32(values["price"]),
+                });
+            }
+            return result.ToArray();
         }
         public override bool Insert(SupplyArrival model) {
             string query = $"INSERT INTO {TableName} (supplier_id, product_id, arrival_time, quantity) VALUES('{model.SupplierId}', '{model.ProductId}', '{model.ArrivalTime.ToUnixTimestamp()}', '{model.Quantity}');";
