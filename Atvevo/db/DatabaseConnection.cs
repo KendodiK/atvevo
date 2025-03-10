@@ -291,7 +291,7 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public SupplyArrival[] GetBySupplierAndArrivalTime(DateTime after) {
+        public SupplyArrival[] GetBySupplierAndArrivalTime(long after) {
             if (TableEntriesCount() == 0) {
                 return Array.Empty<SupplyArrival>();
             }
