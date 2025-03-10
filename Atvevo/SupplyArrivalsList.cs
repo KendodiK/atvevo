@@ -11,7 +11,6 @@ namespace Atvevo {
         
         private Panel _list = new Panel();
         private Panel _rightMenu = new Panel();
-        private ArrivalTimeRange _selectedArrivalTimeRange = ArrivalTimeRange.All;
         private Button _selectDay = new Button();
         private Button _selectWeek = new Button();
         private Button _selectMonth = new Button();
@@ -20,6 +19,7 @@ namespace Atvevo {
         public SupplyArrivalsList(Supplier suppliers, DatabaseConnection databaseConnection) {
             InitializeComponent();
             BuildMenu();
+            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime());
             SizeChanged += ResizeForm;
         }
         private void BuildList(SupplyArrival[] listItems) {
@@ -35,21 +35,21 @@ namespace Atvevo {
             _selectMonth.Size = new Size(80, 40);
             _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 1 + 20 * 1 + 100);
             _selectMonth.Text = "Hónap";
-            _selectMonth.Click += (sender, args) => { _selectedArrivalTimeRange = ArrivalTimeRange.Month; };
+            _selectMonth.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectMonth);
 
             _selectWeek.Tag = ArrivalTimeRange.Week;
             _selectWeek.Size = new Size(80, 40);
             _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 2 + 20 * 2 + 100);
             _selectWeek.Text = "Hét";
-            _selectWeek.Click += (sender, args) => { _selectedArrivalTimeRange = ArrivalTimeRange.Week; };
+            _selectWeek.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectWeek);
 
             _selectDay.Tag = ArrivalTimeRange.Day;
             _selectDay.Size = new Size(80, 40);
             _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 3 + 20 * 3 + 100);
             _selectDay.Text = "Nap";
-            _selectDay.Click += (sender, args) => { _selectedArrivalTimeRange = ArrivalTimeRange.Day; };
+            _selectDay.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectDay);
 
             _selectAll.Tag = ArrivalTimeRange.All;
