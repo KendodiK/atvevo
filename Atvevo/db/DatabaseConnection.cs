@@ -148,7 +148,7 @@ namespace Atvevo.db {
             return result.ToArray();
         }
         public override bool Insert(Supplier model) {
-            string query = $"INSERT INTO {TableName} (name, post_code, county, city, street, house_number, phone, supplier_code) VALUES({model.Name}, {model.ZipCode}, {model.County}, {model.City}, {model.Street}, {model.HouseNumber}, {model.Phone}, {model.Code});";
+            string query = $"INSERT INTO {TableName} (name, post_code, county, city, street, house_number, phone, supplier_code) VALUES('{model.Name}', '{model.ZipCode}', '{model.County}', '{model.City}', '{model.Street}', {model.HouseNumber}, '{model.Phone}', 'BESZ{(model.Id).ToString().PadLeft(4 - model.Id.ToString().Length, '0')}');";
             try {
                 _connection.ExecuteWithoutReturn(query);
                 return true;
