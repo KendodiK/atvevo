@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Atvevo.db;
@@ -6,6 +7,7 @@ using Atvevo.db;
 namespace Atvevo {
     enum ArrivalTimerange { Day, Week, Month, All }
     public partial class SupplyArrivalsList : Form {
+        private Panel _list = new Panel();
         private Panel _rightMenu = new Panel();
         private ArrivalTimerange _selectedArrivalTimerange = ArrivalTimerange.All;
         private Button _selectDay = new Button();
@@ -15,10 +17,13 @@ namespace Atvevo {
         
         public SupplyArrivalsList(Supplier suppliers) {
             InitializeComponent();
-            BuildForm();
+            BuildMenu();
             SizeChanged += ResizeForm;
         }
-        private void BuildForm() {
+        private void BuildList() {
+            
+        }
+        private void BuildMenu() {
             _rightMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _rightMenu.Width = 100;
             _rightMenu.Height = Height;
@@ -49,6 +54,9 @@ namespace Atvevo {
             _rightMenu.Controls.Add(_selectAll);
 
             Controls.Add(_rightMenu);
+        }
+        private void OnListFilterChanged(object sender, ListChangedEventArgs e) {
+            
         }
         private void ResizeForm(object sender, EventArgs e) {
             _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 1 + 20 * 1 + 100);
