@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Atvevo.db;
 
@@ -8,22 +9,69 @@ namespace Atvevo {
     enum ArrivalTimeRange { Day, Week, Month, All }
     public partial class SupplyArrivalsList : Form {
         private DatabaseConnection _databaseConnection;
+        private Supplier _supplier;
         
-        private Panel _list = new Panel();
+        private FlowLayoutPanel _list = new FlowLayoutPanel();
         private Panel _rightMenu = new Panel();
         private Button _selectDay = new Button();
         private Button _selectWeek = new Button();
         private Button _selectMonth = new Button();
         private Button _selectAll = new Button();
-        
-        public SupplyArrivalsList(Supplier suppliers, DatabaseConnection databaseConnection) {
+        public SupplyArrivalsList(Supplier supplier, DatabaseConnection databaseConnection) {
+            _supplier = supplier;
+            _databaseConnection = databaseConnection;
             InitializeComponent();
             BuildMenu();
-            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime());
+            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime(supplier));
             SizeChanged += ResizeForm;
         }
         private void BuildList(SupplyArrival[] listItems) {
+            _list.Dock = DockStyle.Fill;
+            _list.BackColor = Color.Crimson;
+            _list.FlowDirection = FlowDirection.TopDown;
             
+            var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
+            var year = firstDate.Year;
+            var month = firstDate.Month;
+            var day = firstDate.Day;
+            _list.Controls.Add(ListItemNextDate(firstDate));
+            for (int i = 0; i < listItems.Length; i++) {
+                _list.Controls.Add(ListItem(listItems[i], _list.Width, i));
+                if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
+                    year = listItems[i].ArrivalTime.Year;
+                    month = listItems[i].ArrivalTime.Month;
+                    day = listItems[i].ArrivalTime.Day;
+                    _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
+                }
+            }
+        }
+        private Panel ListItem(SupplyArrival item, int width, int index) {
+            FlowLayoutPanel panel = new FlowLayoutPanel();
+            panel.Size = new Size(width, 100);
+            panel.FlowDirection = FlowDirection.LeftToRight;
+            if (index % 2 == 0) {
+                panel.BackColor = Color.White;
+            }
+            else {
+                panel.BackColor = Color.DimGray;
+            }
+            Label arrivalTime = new Label {
+                Text = item.ArrivalTime.ToString("yyyy-M-d dddd"),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(width / 5, 100),
+                Location = new Point(0, 0),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black
+            };
+            panel.Controls.Add(arrivalTime);
+            Label product = new Label {
+
+            };
+            return panel;
+        }
+        private Panel ListItemNextDate(DateTime date) {
+            return new Panel{BackColor = Color.Green};
         }
         private void BuildMenu() {
             _rightMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -65,7 +113,7 @@ namespace Atvevo {
             var btn = (Button)sender;
             Controls.Remove(_list);
             var unixTimeRange = TimeRangeHelper((ArrivalTimeRange)btn.Tag).ToUnixTimestamp();
-            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime(unixTimeRange));
+            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime(_supplier, unixTimeRange));
         }
         private DateTime TimeRangeHelper(ArrivalTimeRange timeRange) {
             var current = DateTime.Now;

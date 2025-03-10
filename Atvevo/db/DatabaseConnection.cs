@@ -291,12 +291,12 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public SupplyArrival[] GetBySupplierAndArrivalTime(long after = 0) {
+        public SupplyArrival[] GetBySupplierAndArrivalTime(Supplier model, long after = 0) {
             if (TableEntriesCount() == 0) {
                 return Array.Empty<SupplyArrival>();
             }
             List<SupplyArrival> result = new List<SupplyArrival>();
-            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE arrival_time >= {after};");
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE supplier_id = {model.Id} AND arrival_time >= {after};");
             while (queryResult.Read()) {
                 Dictionary<string, string> values = new Dictionary<string, string>();
                 for (int i = 0; i < typeof(SupplyArrival).GetProperties().Length; i++) {
