@@ -107,7 +107,7 @@ namespace Atvevo.db {
         }
         public abstract TClass[] Read();
         public abstract bool Insert(TClass model);
-        public abstract bool Update(int modifiedId, TClass model);
+        public abstract bool Update(TClass model);
         public abstract bool Delete(TClass model);
     }
     public class SuppliersTable : DatabaseTable<Supplier> {
@@ -156,7 +156,7 @@ namespace Atvevo.db {
                 return false;
             }
         }
-        public override bool Update(int modifiedId, Supplier model) {
+        public override bool Update(Supplier model) {
             string update = $"name = '{model.Name}', post_code = '{model.ZipCode}', county = {model.County}, city = {model.City}, street = {model.Street}, house_number = {model.HouseNumber}, phone = {model.Phone}, supplier_code = '{model.Code}'";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id}";
             try {
@@ -239,7 +239,7 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public override bool Update(int modifiedId, Product model) {
+        public override bool Update(Product model) {
             string update = $"name = '{model.Name}', category = '{model.Category}', price = '{model.Price}'";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id}";
             try {
@@ -286,7 +286,7 @@ namespace Atvevo.db {
                 return false;
             }
         }
-        public override bool Update(int modifiedId, SupplyArrival model) {
+        public override bool Update(SupplyArrival model) {
             string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}', arrival_time = {model.ArrivalTime.ToUnixTimestamp()}, quantity = {model.Quantity}";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id};";
             try {
@@ -333,7 +333,7 @@ namespace Atvevo.db {
                 return false;
             }
         }
-        public override bool Update(int modifiedId, SupplierProductConnection model) {
+        public override bool Update(SupplierProductConnection model) {
             string update = $"supplier_id = '{model.SupplierId}', product_id = '{model.ProductId}";
             string query = $"UPDATE {TableName} SET {update} WHERE id = {model.Id};";
             try {
