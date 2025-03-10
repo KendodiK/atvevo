@@ -70,7 +70,7 @@ namespace Atvevo.db {
             }
         }
         public void DatabaseDisconnect() {
-            _connection.Close();
+            _connection.Dispose();
         }
     }
     public abstract class DatabaseTable<TClass> where TClass : class {

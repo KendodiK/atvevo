@@ -16,11 +16,11 @@ namespace Atvevo
             private int fomTop { get; set;}
             private Product fruit { get; set;}
             private Label fruitNameLabel { get; set;}
-            private List<(Product, int)> products { get; set;}
+            private List<(int, int)> products { get; set;}
             public CheckBox fruitCheckBox;
             public NumericUpDown quantity;
             
-            List<(Product, int)> Products {
+            List<(int, int)> Products {
                 get => products;
             }
             
@@ -78,7 +78,7 @@ namespace Atvevo
 
             private void addProduct(object sender, EventArgs e)
             {
-                products.Add((fruit, (int)quantity.Value));
+                products.Add((fruit.Id, (int)quantity.Value));
             }
         }
         
@@ -109,7 +109,7 @@ namespace Atvevo
             FormClosing += (sender, args) => { databaseConnection.DatabaseDisconnect(); };
         }
 
-        static void BuildForm(Form mainWin, DatabaseConnection databaseConnection)
+        private void BuildForm(Form mainWin, DatabaseConnection databaseConnection)
         {
             _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
             selectElementsPanel = new Panel { Parent = mainWin, Width = 380, Height = 300, Top = 50, Left = 20, };
@@ -154,7 +154,6 @@ namespace Atvevo
                     Text = "Beszállító \nmódosítása", Enabled = false
                 };
                 changeSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                changeSupplierButton.Click += (sender, args) => changeSupplier(sender, args, databaseConnection, _supplierDropdown.SelectedIndex);
 
             deleteSupplierButton = new Button
                 { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 4 + 10, Left = 620, 
@@ -182,12 +181,13 @@ namespace Atvevo
                     sender, args, databaseConnection, suppliers[_supplierDropdown.SelectedIndex]);
         }
         
-        private static void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
+        private void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
         {
             selectElements.Clear();
             selectElementsPanel.Controls.Clear();
             addSupplierButton.Enabled = false;
             changeSupplierButton.Enabled = true;
+            changeSupplierButton.Click += (senderBtn, args) => changeSupplier(senderBtn, args, databaseConnection, supplier);
             deleteSupplierButton.Enabled = true;
             deleteSupplierButton.Click += (senderBtn, args) => deleteSupplier(senderBtn, args, databaseConnection, supplier);
             ComboBox suppliers = (ComboBox)sender;
@@ -201,7 +201,7 @@ namespace Atvevo
             writeSupplierData(supplier);
         }
 
-        private static void writeSupplierData(Supplier supplier)
+        private void writeSupplierData(Supplier supplier)
         {
             inName.Text = supplier.Name;
             inCity.Text = supplier.City;
@@ -211,7 +211,7 @@ namespace Atvevo
             inPhone.Text = supplier.Phone;
         }
 
-        private static void addNewSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection)
+        private void addNewSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection)
         {
             if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
                 inHouseNumber.Text == "" || inPhone.Text == "")
@@ -229,21 +229,67 @@ namespace Atvevo
                     HouseNumber = Convert.ToByte(inHouseNumber.Text),
                     Phone = inPhone.Text,
                 };
-                databaseConnection.SuppliersTable.Insert(supplier);
-                _supplierDropdown.Items.Add(supplier.Name);   
-                _supplierDropdown.SelectedIndex = _supplierDropdown.Items.Count - 1;
+                if (databaseConnection.SuppliersTable.Insert(supplier))
+                {
+                    MessageBox.Show("Sikeresen hozzáadva!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _supplierDropdown.Items.Add(supplier.Name);   
+                    _supplierDropdown.SelectedIndex = _supplierDropdown.Items.Count - 1;
+                }
+                else
+                {
+                    ErrorMsg();
+                }
             }
         }
 
-        private static void changeSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection,
-            int supplierIndex)
+        private void changeSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection, 
+            Supplier supplier)
         {
-            //databaseConnection.SuppliersTable. adott id-jű supplier módosítása (opcionálisan: delete-hez hasonlóan áthozni a supplier-t)
+            if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
+                inHouseNumber.Text == "" || inPhone.Text == "")
+            {
+                MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                supplier.Name = inName.Text;
+                supplier.City = inCity.Text;
+                supplier.ZipCode = inZipCode.Text;
+                supplier.Street = inStreet.Text;
+                supplier.HouseNumber = Convert.ToByte(inHouseNumber.Text);
+                supplier.Phone = inPhone.Text;
+
+                if (databaseConnection.SuppliersTable.Update(supplier))
+                {
+                    MessageBox.Show("Sikeresen módosítva!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    ErrorMsg();
+                } 
+            }
         }
 
-        private static void deleteSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
+        private void deleteSupplier(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
         {
-            //databaseConnection.SuppliersTable.Delete(supplier.Id); törlés??
+            if (databaseConnection.SuppliersTable.Delete(supplier))
+            {
+                MessageBox.Show("Sikeresen törölve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                ErrorMsg();
+            } 
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void ErrorMsg()
+        {
+            MessageBox.Show("Nem várt hiba! Kérjük próbálja meg újra!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
