@@ -47,7 +47,7 @@ namespace Atvevo
                 this.fruitNameLabel = new Label
                 {
                     Parent = mainWindow,
-                    Width = 300,
+                    Width = 250,
                     Height = 60,
                     Top = fomTop,
                     Left = fomLeft + 80,
@@ -120,20 +120,20 @@ namespace Atvevo
         private void BuildForm(Form mainWin, DatabaseConnection databaseConnection)
         {
             _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
-            selectElementsPanel = new Panel { Parent = mainWin, Width = 380, Height = 300, Top = 160, Left = 20, };
+            selectElementsPanel = new Panel { Parent = mainWin, Width = 390, Height = 300, Top = 160, Left = 20, AutoScroll = true};
             selectElementsPanel.VerticalScroll.Enabled = true;
             
             int supplierTop = 30;
             Label name = new Label 
-                { Parent = mainWin, Width = 45, Height = 20, Left = 400, Top = 10, Text = "Név:",};
+                { Parent = mainWin, Width = 45, Height = 20, Left = 420, Top = 10, Text = "Név:",};
             Label city = new Label 
-                { Parent = mainWin, Width = 130, Height = 20, Top = supplierTop + 10, Left = 400, Text = "Város, ir. sz.:",};
+                { Parent = mainWin, Width = 130, Height = 20, Top = supplierTop + 10, Left = 420, Text = "Város, ir. sz.:",};
             Label county = new Label 
-                {Parent = mainWin, Width = 100, Top = supplierTop * 2 + 10, Left = 400, Text = "Megye:",};
+                {Parent = mainWin, Width = 100, Top = supplierTop * 2 + 10, Left = 420, Text = "Megye:",};
             Label streeth = new Label 
-                { Parent = mainWin, Width = 100, Height = 20, Top = supplierTop * 3 + 10, Left = 400, Text = "Utca, hsz.:",};
+                { Parent = mainWin, Width = 100, Height = 20, Top = supplierTop * 3 + 10, Left = 420, Text = "Utca, hsz.:",};
             Label phoneNum = new Label 
-                { Parent = mainWin, Width = 80, Height = 20, Top = supplierTop * 4 + 10, Left = 400, Text = "Tel. sz.",};
+                { Parent = mainWin, Width = 80, Height = 20, Top = supplierTop * 4 + 10, Left = 420, Text = "Tel. sz.",};
 
             addFruitPanel = new Panel { Parent = mainWin, Width = 380, Height = 110, Top = 40, Left = 20, Visible = false};
             Label fruitName = new Label
@@ -148,7 +148,7 @@ namespace Atvevo
             addFruitButton = new Button 
                 { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 60, Text = "Gyümölcs hozzáadása"};
                 addFruitButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                addFruitButton.Click += (sender, args) => { };
+                addFruitButton.Click += (sender, args) => AddFruitButton_Click(sender, args, databaseConnection);
 
 
                 int leftCounted = name.Left + name.Width + 10;
@@ -174,29 +174,29 @@ namespace Atvevo
                 { Parent = mainWin, Width = 200, Height = 20, Top = supplierTop * 4 + 10, Left = leftCounted };
 
             addSupplierButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 400, Text = "Beszállító \nhozzáadása",};
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 420, Text = "Beszállító \nhozzáadása",};
                 addSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                 addSupplierButton.Click += (sender, args) => addNewSupplier(sender, args, databaseConnection);
 
             changeSupplierButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 510, 
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 530, 
                     Text = "Beszállító \nmódosítása", Enabled = false
                 };
                 changeSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
 
             deleteSupplierButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 620, 
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 640, 
                     Text = "Beszállító \ntörlése", Enabled = false
                 };
                 deleteSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
 
             showListButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 510, Text = "Lista megjelenítése", };
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése", };
                 showListButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                 showListButton.Click += (sender, args) => { };
 
             saveButton = new Button
-                { Parent = mainWin, Width = 150, Height = 30, Top = 360, Left = 400, Text = "Beszállítás mentése", Enabled = false};
+                { Parent = mainWin, Width = 150, Height = 30, Top = 360, Left = 430, Text = "Beszállítás mentése", Enabled = false};
                 saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                     
                     
@@ -227,6 +227,17 @@ namespace Atvevo
                 FruitSelectElement fruitSelectElement = new FruitSelectElement(
                     10,  i * 60 , fruits[i], selectElementsPanel);
                 selectElements.Add(fruitSelectElement);
+                Button delButton = new Button
+                {
+                    Parent = selectElementsPanel,
+                    Width = 30,
+                    Height = 30,
+                    Top = i * 60,
+                    Left = 340,
+                    Tag = i,
+                    Text = "X",
+                };
+                delButton.Click += (senderBtn, args) => DeleteFruitButton_Click(senderBtn, args, databaseConnection, supplier);
             }
             writeSupplierData(supplier);
             saveButton.Click += (senderBtn, args) => saveButton_Click(senderBtn, args, databaseConnection);
@@ -280,7 +291,7 @@ namespace Atvevo
             if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
                 inHouseNumber.Text == "" || inPhone.Text == "")
             {
-                MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AddError();
             }
             else
             {
@@ -343,6 +354,69 @@ namespace Atvevo
         private void ErrorMsg()
         {
             MessageBox.Show("Nem várt hiba! Kérjük próbálja meg újra!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void AddError()
+        {
+            MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void AddFruitButton_Click(object sender, EventArgs e, DatabaseConnection databaseConnection)
+        {
+            if (inFruitCategory.Text == "" || inFruitName.Text == "" || inFruitPrice.Text == "")
+            {
+                AddError();
+            }
+            else
+            {
+                Product fruit = new Product
+                {
+                    Category = inFruitCategory.Text,
+                    Name = inFruitName.Text,
+                    Price =  Convert.ToDouble(inFruitPrice.Text),
+                };
+                databaseConnection.ProductsTable.Insert(fruit);
+                SupplierProductConnection connection = new SupplierProductConnection
+                {
+                    ProductId = databaseConnection.ProductsTable.TableEntriesCount(),
+                    SupplierId = _supplierDropdown.SelectedIndex + 1,
+                };
+                if (databaseConnection.SupplierProductConnectionTable.Insert(connection))
+                {
+                    MessageBox.Show("Sikeresen mentve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    ErrorMsg();
+                }
+            }
+        }
+
+        private void DeleteFruitButton_Click(object sender, EventArgs e, DatabaseConnection databaseConnection, Supplier supplier)
+        {
+            if (MessageBox.Show("Biztos törölni akarja?", "Figyelmeztetés", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                Button delButton = (Button)sender;
+                int index = Convert.ToInt32(delButton.Tag);
+                SupplierProductConnection connection = new SupplierProductConnection
+                {
+                    ProductId = databaseConnection.ProductsTable.GetBySupplier(supplier)[index].Id,
+                    SupplierId = supplier.Id,
+                };
+                if(databaseConnection.SupplierProductConnectionTable.Delete(connection))
+                {
+                    MessageBox.Show("Sikeresen törölve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    SupplierDropdown_SelectedIndexChanged(null, null, databaseConnection, supplier);
+                }
+                else
+                {
+                    ErrorMsg();
+                }
+            }
+            else
+            {
+                return;
+            }
         }
     }
 }

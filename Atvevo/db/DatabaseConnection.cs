@@ -379,7 +379,7 @@ namespace Atvevo.db {
             }
         }
         public override bool Delete(SupplierProductConnection model) {
-            var query = $"DELETE FROM {TableName} WHERE supplier_id = '{model.SupplierId}' AND product_id = '{model.ProductId}';";
+            var query = $"DELETE FROM {TableName} WHERE supplier_id = {model.SupplierId} AND product_id = {model.ProductId};";
             try {
                 _connection.ExecuteWithoutReturn(query);
                 return true;
