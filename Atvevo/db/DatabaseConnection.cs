@@ -101,7 +101,7 @@ namespace Atvevo.db {
                 }
             }
         }
-        protected int TableEntriesCount() {
+        public int TableEntriesCount() {
             var result = _connection.ExecuteWithSingleReturn($"SELECT COUNT(*) FROM {_tableName};");
             return Convert.ToInt32(result);
         }
