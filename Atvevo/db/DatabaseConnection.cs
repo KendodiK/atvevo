@@ -267,6 +267,7 @@ namespace Atvevo.db {
         public const string TableName = "supply_arrivals";
         public SupplyArrivalsTable(DatabaseConnection connection) {
             _connection = connection;
+            _tableName = TableName;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
