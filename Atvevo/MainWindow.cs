@@ -86,6 +86,7 @@ namespace Atvevo
         }
         
         private static ComboBox _supplierDropdown;
+        private static ComboBox _fruitDropdown;
         private static Panel selectElementsPanel;
         private static TextBox inName;
         private static TextBox inCity;
@@ -115,7 +116,7 @@ namespace Atvevo
             _databaseConnection = new DatabaseConnection(true);
             Font = new System.Drawing.Font("Microsoft Sans Serif", 13);
             Width = 800;
-            Height = 500;
+            Height = 550;
             BuildForm(this);
             FormClosing += (sender, args) => { _databaseConnection.DatabaseDisconnect(); };
         }
@@ -123,7 +124,7 @@ namespace Atvevo
         private void BuildForm(Form mainWin)
         {
             _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
-            selectElementsPanel = new Panel { Parent = mainWin, Width = 390, Height = 300, Top = 160, Left = 20, AutoScroll = true};
+            selectElementsPanel = new Panel { Parent = mainWin, Width = 390, Height = 300, Top = 210, Left = 20, AutoScroll = true};
             selectElementsPanel.VerticalScroll.Enabled = true;
             
             int supplierTop = 30;
@@ -138,22 +139,35 @@ namespace Atvevo
             Label phoneNum = new Label 
                 { Parent = mainWin, Width = 80, Height = 20, Top = supplierTop * 4 + 10, Left = 420, Text = "Tel. sz.",};
 
-            addFruitPanel = new Panel { Parent = mainWin, Width = 380, Height = 110, Top = 40, Left = 20, Visible = false};
+            addFruitPanel = new Panel { Parent = mainWin, Width = 380, Height = 160, Top = 40, Left = 20, Visible = false};
             Label fruitName = new Label
                 { Parent = addFruitPanel, Width = 50, Height = 25, Left = 30, Text = "Fajta",};
             Label fruitCategory = new Label
                 { Parent = addFruitPanel, Width = 90, Left = 120, Height = 25, Text = "Gyömölcs típus",};
             Label price = new Label 
                 { Parent = addFruitPanel, Width = 70, Left = 210, Height = 25, Text = "Kilóár",};
-            inFruitCategory = new TextBox { Parent = addFruitPanel, Width = 120, Top = 30, };
+            inFruitCategory = new TextBox { Parent = addFruitPanel, Width = 120, Top = 30, Tag = ""};
             inFruitName = new TextBox { Parent = addFruitPanel, Width = 70, Left = 130, Top = 30, };
             inFruitPrice = new TextBox { Parent = addFruitPanel, Width = 50, Left = 210, Top = 30, };
+            
+            _fruitDropdown = new ComboBox
+                { Parent = addFruitPanel, Width = 270, Height = 20, Top = 70, DropDownStyle = ComboBoxStyle.DropDownList,};
+            var fruits = _databaseConnection.ProductsTable.Read();
+            int i = 0;
+            _fruitDropdown.Items.Add("Már rögzített fajta kiválasztása");
+            _fruitDropdown.SelectedIndex = 0;
+            foreach (Product fruitElement in fruits)
+            {
+                _fruitDropdown.Items.Add(fruitElement.Name + $" ({fruitElement.Category})");
+                i++;
+            }
+            _fruitDropdown.SelectedIndexChanged += (sender, args) => FruitDropdown_SelectedIndexChanged(sender, args, fruits);
             addFruitButton = new Button 
-                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 60, Text = "Gyümölcs hozzáadása"};
+                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 110, Text = "Gyümölcs hozzáadása"};
                 addFruitButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                addFruitButton.Click += AddFruitButton_Click;
+                addFruitButton.Click += (sender, args) => AddFruitButton_Click(sender, args);
 
-                int leftCounted = name.Left + name.Width + 10;
+            int leftCounted = name.Left + name.Width + 10;
             inName = new TextBox 
                 { Parent = mainWin, Width = 200, Height = 20, Top = 10, Left = leftCounted };
             leftCounted = city.Left + city.Width + 10;
@@ -203,7 +217,7 @@ namespace Atvevo
                     
             var suppliers = this._databaseConnection.SuppliersTable.Read();
             string[] suppliersNames = new string[suppliers.Length];
-            int i = 0;
+            i = 0;
             _supplierDropdown.Items.Add("---------");
             _supplierDropdown.SelectedIndex = 0;
             foreach (var supplier in suppliers)
@@ -328,7 +342,7 @@ namespace Atvevo
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 }
             }
         }
@@ -355,7 +369,7 @@ namespace Atvevo
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 } 
             }
         }
@@ -373,7 +387,7 @@ namespace Atvevo
             }
             else
             {
-                ErrorMsg();
+                UnknownErrorMsg();
             } 
         }
 
@@ -403,7 +417,7 @@ namespace Atvevo
             }
         }
 
-        private void ErrorMsg()
+        private void UnknownErrorMsg()
         {
             MessageBox.Show("Nem várt hiba! Kérjük próbálja meg újra!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -413,6 +427,14 @@ namespace Atvevo
             MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        private void FruitDropdown_SelectedIndexChanged(object sender, EventArgs e, Product[] fruits)
+        {
+            inFruitCategory.Text = fruits[_fruitDropdown.SelectedIndex - 1].Name;
+            inFruitCategory.Tag = fruits[_fruitDropdown.SelectedIndex - 1].Id;
+            inFruitName.Text = fruits[_fruitDropdown.SelectedIndex - 1].Category;
+            inFruitPrice.Text = fruits[_fruitDropdown.SelectedIndex - 1].Price.ToString();
+        }
+        
         private void AddFruitButton_Click(object sender, EventArgs e)
         {
             if (inFruitCategory.Text == "" || inFruitName.Text == "" || inFruitPrice.Text == "")
@@ -421,29 +443,43 @@ namespace Atvevo
             }
             else
             {
+                bool isNew = inFruitCategory.Tag == "";
                 Product fruit = new Product
                 {
-                    Category = inFruitCategory.Text,
-                    Name = inFruitName.Text,
-                    Price =  Convert.ToDouble(inFruitPrice.Text),
+                    Name = inFruitCategory.Text,
+                    Category = inFruitName.Text,
+                    Price = Convert.ToDouble(inFruitPrice.Text),
                 };
-                _databaseConnection.ProductsTable.Insert(fruit);
+                int id;
+                if (isNew)
+                {
+                    id = _databaseConnection.ProductsTable.TableEntriesCount();
+                    _databaseConnection.ProductsTable.Insert(fruit);
+
+                }
+                else
+                {
+                    id = Convert.ToInt32(inFruitCategory.Tag);
+                    _databaseConnection.ProductsTable.Update(fruit);
+                }
                 SupplierProductConnection connection = new SupplierProductConnection
                 {
-                    ProductId = _databaseConnection.ProductsTable.TableEntriesCount(),
+                    ProductId = id,
                     SupplierId = _activeSupplier.Id,
                 };
                 if (_databaseConnection.SupplierProductConnectionTable.Insert(connection))
                 {
-                    MessageBox.Show("Sikeresen mentve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Sikeresen mentve!", "Sikeres", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
                     SupplierDropdown_SelectedIndexChanged(null, null, _activeSupplier);
                     inFruitCategory.Text = "";
+                    inFruitCategory.Tag = "";
                     inFruitName.Text = "";
                     inFruitPrice.Text = "";
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 }
             }
         }
@@ -466,7 +502,7 @@ namespace Atvevo
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 }
             }
             else
