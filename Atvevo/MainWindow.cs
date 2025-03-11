@@ -174,11 +174,6 @@ namespace Atvevo
             inPhone = new TextBox 
                 { Parent = mainWin, Width = 200, Height = 20, Top = supplierTop * 4 + 10, Left = leftCounted };
 
-            addSupplierButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 420, Text = "Beszállító \nhozzáadása",};
-                addSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                addSupplierButton.Click += addNewSupplier;
-
             changeSupplierButton = new Button
                 { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 530, 
                     Text = "Beszállító \nmódosítása", Enabled = false
