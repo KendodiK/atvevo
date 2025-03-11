@@ -19,15 +19,13 @@ namespace Atvevo {
         public SupplyArrivalsList(DatabaseConnection databaseConnection) {
             _databaseConnection = databaseConnection;
             InitializeComponent();
-            MinimumSize = new Size(700, 400);
+            MinimumSize = new Size(600, 400);
             BuildMenu();
             BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime());
             Resize += ResizeForm;
         }
         private void BuildList(SupplyArrival[] listItems) {
-            _list.Dock = DockStyle.Fill;
-            _list.Size = new Size(Width - _list.Width, Height);
-            _list.BackColor = Color.Crimson;
+            _list.Size = new Size(Width - _rightMenu.Width - 20, Height);
             _list.FlowDirection = FlowDirection.TopDown;
             _list.VerticalScroll.Enabled = true;
 
@@ -36,77 +34,88 @@ namespace Atvevo {
                 var year = firstDate.Year;
                 var month = firstDate.Month;
                 var day = firstDate.Day;
-                _list.Controls.Add(ListItemNextDate(firstDate, _list.Width));
+                _list.Controls.Add(ListItemNextDate(firstDate));
                 for (int i = 0; i < listItems.Length; i++) {
-                    _list.Controls.Add(ListItem(listItems[i], _list.Width, i));
+                    _list.Controls.Add(ListItem(listItems[i], i));
                     if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
                         year = listItems[i].ArrivalTime.Year;
                         month = listItems[i].ArrivalTime.Month;
                         day = listItems[i].ArrivalTime.Day;
-                        _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime, _list.Width));
+                        _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
                     }
                 }
                 Controls.Add(_list);
             }
         }
-        private Panel ListItem(SupplyArrival item, int width, int index) {
-            FlowLayoutPanel panel = new FlowLayoutPanel();
-            panel.Size = new Size(width, 100);
-            panel.FlowDirection = FlowDirection.LeftToRight;
+        private Panel ListItem(SupplyArrival item, int index) {
+            TableLayoutPanel panel = new TableLayoutPanel();
+            panel.Dock = DockStyle.Fill;
+            panel.ColumnCount = 4;
+            panel.RowCount = 1;
+            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 12));
+            panel.AutoSize = true;
+            panel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            panel.Font = new Font(FontFamily.GenericSansSerif, 13);
             if (index % 2 == 0) {
                 panel.BackColor = Color.White;
             }
             else {
-                panel.BackColor = Color.DimGray;
+                panel.BackColor = Color.LightBlue;
             }
             Label supplier = new Label() {
                 Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
+                Height = 50,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
             };
-            panel.Controls.Add(supplier);
+            panel.Controls.Add(supplier,0, 0);
             Label product = new Label() {
                 Text = _databaseConnection.ProductsTable.Read()[item.ProductId].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
+                Height = 50,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
             };
-            panel.Controls.Add(product);
+            panel.Controls.Add(product, 1, 0);
             Label arrivalTime = new Label {
-                Text = item.ArrivalTime.ToString("yyyy. M. dddd, HH:mm"),
+                Text = item.ArrivalTime.ToString("yyyy. M. d HH:mm"),
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
+                Height = 50,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
             };
-            panel.Controls.Add(arrivalTime);
+            panel.Controls.Add(arrivalTime, 2, 0);
             Label quantity = new Label {
                 Text = item.Quantity + " kg",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
+                Height = 50,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
             };
-            panel.Controls.Add(quantity);
+            panel.Controls.Add(quantity, 3, 0);
+            _list.SizeChanged += (object sender, EventArgs e) => {
+                panel.Width = _list.Width;
+            };
             return panel;
         }
-        private Panel ListItemNextDate(DateTime date, int width) {
+        private Panel ListItemNextDate(DateTime date) {
             Panel panel = new Panel {
-                Size = new Size(width, 50),
+                Size = new Size(_list.Width, 50),
                 Location = new Point(0, 0),
                 ForeColor = Color.Black,
-                BackColor = Color.Green
+                BackColor = Color.Aquamarine
             };
             Label dateLabel = new Label {
                 Text = date.ToString("yyyy. M."),
@@ -117,6 +126,9 @@ namespace Atvevo {
                 ForeColor = Color.Black
             };
             panel.Controls.Add(dateLabel);
+            _list.SizeChanged += (object sender, EventArgs e) => {
+                panel.Width = _list.Width;
+            };
             return panel;
         }
         private void BuildMenu() {
@@ -157,6 +169,7 @@ namespace Atvevo {
         }
         private void OnListFilterChanged(object sender, EventArgs e) {
             var btn = (Button)sender;
+            _list.Controls.Clear();
             Controls.Remove(_list);
             var unixTimeRange = TimeRangeHelper((ArrivalTimeRange)btn.Tag).ToUnixTimestamp();
             BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime(unixTimeRange));
@@ -182,6 +195,8 @@ namespace Atvevo {
             _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 50);
             _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 100);
             _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 150);
+            
+            _list.Width = Width - _rightMenu.Width - 20;
         }
     }
 }
