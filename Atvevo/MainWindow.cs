@@ -189,7 +189,11 @@ namespace Atvevo
             showListButton = new Button
                 { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése"};
                 showListButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                showListButton.Click += ShowListButton_Click;
+                showListButton.Click += ((sender, args) => {
+                    Task.Run(() => {
+                        Application.Run(new SupplyArrivalsList(_databaseConnection));
+                    });
+                });
 
             saveButton = new Button
                 { Parent = mainWin, Width = 150, Height = 30, Top = 10, Left = 160, Text = "Beszállítás mentése", Enabled = false};
@@ -204,12 +208,6 @@ namespace Atvevo
             _supplierDropdown.SelectedIndexChanged += 
                 (sender, args) => SupplierDropdown_SelectedIndexChanged(
                     sender, args, suppliers[_supplierDropdown.SelectedIndex]);
-        }
-        private void ShowListButton_Click(object sender, EventArgs e) {
-            var supplier = ((Button)sender).Tag as Supplier;
-            Task.Run(() => {
-                Application.Run(new SupplyArrivalsList(_databaseConnection));
-            });
         }
         private void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, Supplier supplier)
         {

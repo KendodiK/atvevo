@@ -29,7 +29,7 @@ namespace Atvevo {
             _list.FlowDirection = FlowDirection.TopDown;
 
             if (listItems.Length > 0) {
-                var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0]; //TODO: Ha 0 a listintems, akkor hiba
+                var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
                 var year = firstDate.Year;
                 var month = firstDate.Month;
                 var day = firstDate.Day;
@@ -81,28 +81,28 @@ namespace Atvevo {
 
             _selectMonth.Tag = ArrivalTimeRange.Month;
             _selectMonth.Size = new Size(80, 40);
-            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 1 + 20 * 1 + 100);
+            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 100);
             _selectMonth.Text = "Hónap";
             _selectMonth.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectMonth);
 
             _selectWeek.Tag = ArrivalTimeRange.Week;
             _selectWeek.Size = new Size(80, 40);
-            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 2 + 20 * 2 + 100);
+            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 150);
             _selectWeek.Text = "Hét";
             _selectWeek.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectWeek);
 
             _selectDay.Tag = ArrivalTimeRange.Day;
             _selectDay.Size = new Size(80, 40);
-            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 3 + 20 * 3 + 100);
+            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 200);
             _selectDay.Text = "Nap";
             _selectDay.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectDay);
 
             _selectAll.Tag = ArrivalTimeRange.All;
             _selectAll.Size = new Size(80, 40);
-            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 5 + 20 * 5 + 100);
+            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 250);
             _selectAll.Text = "Összes";
             _selectAll.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectAll);
@@ -131,10 +131,10 @@ namespace Atvevo {
             }
         }
         private void ResizeForm(object sender, EventArgs e) {
-            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 1 + 20 * 1 + 100);
-            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 2 + 20 * 2 + 100);
-            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 3 + 20 * 3 + 100);
-            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, 40 * 5 + 20 * 5 + 100);
+            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 100);
+            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 150);
+            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 200);
+            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 250);
         }
     }
 }

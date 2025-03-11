@@ -308,7 +308,7 @@ namespace Atvevo.db {
                     SupplierId = Convert.ToInt32(values["supplier_id"]),
                     ProductId = Convert.ToInt32(values["product_id"]),
                     ArrivalTime = Convert.ToInt64(values["arrival_time"]).FromUnixTimestamp(),
-                    Quantity = Convert.ToInt32(values["price"]),
+                    Quantity = Convert.ToInt32(values["quantity"]),
                 });
             }
             return result.ToArray();
