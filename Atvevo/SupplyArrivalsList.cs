@@ -26,25 +26,27 @@ namespace Atvevo {
         }
         private void BuildList(SupplyArrival[] listItems) {
             _list.Dock = DockStyle.Fill;
+            _list.Size = new Size(Width - _list.Width, Height);
             _list.BackColor = Color.Crimson;
             _list.FlowDirection = FlowDirection.TopDown;
-            _list.AutoScroll = true;
+            _list.VerticalScroll.Enabled = true;
 
             if (listItems.Length > 0) {
                 var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
                 var year = firstDate.Year;
                 var month = firstDate.Month;
                 var day = firstDate.Day;
-                _list.Controls.Add(ListItemNextDate(firstDate));
+                _list.Controls.Add(ListItemNextDate(firstDate, _list.Width));
                 for (int i = 0; i < listItems.Length; i++) {
                     _list.Controls.Add(ListItem(listItems[i], _list.Width, i));
                     if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
                         year = listItems[i].ArrivalTime.Year;
                         month = listItems[i].ArrivalTime.Month;
                         day = listItems[i].ArrivalTime.Day;
-                        _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
+                        _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime, _list.Width));
                     }
                 }
+                Controls.Add(_list);
             }
         }
         private Panel ListItem(SupplyArrival item, int width, int index) {
@@ -60,7 +62,7 @@ namespace Atvevo {
             Label supplier = new Label() {
                 Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 5, 100),
+                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
@@ -70,7 +72,7 @@ namespace Atvevo {
             Label product = new Label() {
                 Text = _databaseConnection.ProductsTable.Read()[item.ProductId].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 5, 100),
+                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
@@ -80,7 +82,7 @@ namespace Atvevo {
             Label arrivalTime = new Label {
                 Text = item.ArrivalTime.ToString("yyyy. M. dddd, HH:mm"),
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 5, 100),
+                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
@@ -88,18 +90,34 @@ namespace Atvevo {
             };
             panel.Controls.Add(arrivalTime);
             Label quantity = new Label {
-                Text = item.Quantity.ToString() + " kg",
+                Text = item.Quantity + " kg",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Size = new Size(width / 5, 100),
+                Size = new Size(width / 4, 100),
                 Location = new Point(0, 0),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
             };
+            panel.Controls.Add(quantity);
             return panel;
         }
-        private Panel ListItemNextDate(DateTime date) {
-            return new Panel{BackColor = Color.Green};
+        private Panel ListItemNextDate(DateTime date, int width) {
+            Panel panel = new Panel {
+                Size = new Size(width, 50),
+                Location = new Point(0, 0),
+                ForeColor = Color.Black,
+                BackColor = Color.Green
+            };
+            Label dateLabel = new Label {
+                Text = date.ToString("yyyy. M."),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(0, 0),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black
+            };
+            panel.Controls.Add(dateLabel);
+            return panel;
         }
         private void BuildMenu() {
             _rightMenu.Dock = DockStyle.Right;
