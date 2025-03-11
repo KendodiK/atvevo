@@ -192,11 +192,12 @@ namespace Atvevo
                 deleteSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
 
             showListButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése", Enabled = false};
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése"};
                 showListButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+                showListButton.Click += ShowListButton_Click;
 
             saveButton = new Button
-                { Parent = mainWin, Width = 150, Height = 30, Top = 360, Left = 430, Text = "Beszállítás mentése", Enabled = false};
+                { Parent = mainWin, Width = 150, Height = 30, Top = 10, Left = 160, Text = "Beszállítás mentése", Enabled = false};
                 saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                     
                     
@@ -208,19 +209,8 @@ namespace Atvevo
             _supplierDropdown.SelectedIndexChanged += 
                 (sender, args) => SupplierDropdown_SelectedIndexChanged(
                     sender, args, suppliers[_supplierDropdown.SelectedIndex]);
-            _supplierDropdown.SelectedIndexChanged += (sender, args) => {
-                showListButton.Tag = suppliers[_supplierDropdown.SelectedIndex];
-                if (showListButton.Enabled == false) {
-                    showListButton.Enabled = true;
-                    showListButton.Click += OnShowListButtonClick;
-                }
-                else {
-                    showListButton.Click -= OnShowListButtonClick;
-                    showListButton.Click += OnShowListButtonClick;
-                }
-            };
         }
-        private void OnShowListButtonClick(object sender, EventArgs e) {
+        private void ShowListButton_Click(object sender, EventArgs e) {
             var supplier = ((Button)sender).Tag as Supplier;
             Task.Run(() => {
                 Application.Run(new SupplyArrivalsList(supplier, _databaseConnection));
