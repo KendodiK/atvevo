@@ -1,4 +1,4 @@
 Atvevo/db/atvevo.db
 Atvevo/.vs/Atvevo/v17/Browse.VC.opendb
-Atvevo/bin/Debug
-Atvevo/obj/Debug
+Atvevo/bin/Debug/*
+Atvevo/obj/Debug/*

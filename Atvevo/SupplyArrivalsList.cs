@@ -29,19 +29,21 @@ namespace Atvevo {
             _list.Dock = DockStyle.Fill;
             _list.BackColor = Color.Crimson;
             _list.FlowDirection = FlowDirection.TopDown;
-            
-            var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
-            var year = firstDate.Year;
-            var month = firstDate.Month;
-            var day = firstDate.Day;
-            _list.Controls.Add(ListItemNextDate(firstDate));
-            for (int i = 0; i < listItems.Length; i++) {
-                _list.Controls.Add(ListItem(listItems[i], _list.Width, i));
-                if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
-                    year = listItems[i].ArrivalTime.Year;
-                    month = listItems[i].ArrivalTime.Month;
-                    day = listItems[i].ArrivalTime.Day;
-                    _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
+
+            if (listItems.Length > 0) {
+                var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0]; //TODO: Ha 0 a listintems, akkor hiba
+                var year = firstDate.Year;
+                var month = firstDate.Month;
+                var day = firstDate.Day;
+                _list.Controls.Add(ListItemNextDate(firstDate));
+                for (int i = 0; i < listItems.Length; i++) {
+                    _list.Controls.Add(ListItem(listItems[i], _list.Width, i));
+                    if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
+                        year = listItems[i].ArrivalTime.Year;
+                        month = listItems[i].ArrivalTime.Month;
+                        day = listItems[i].ArrivalTime.Day;
+                        _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
+                    }
                 }
             }
         }

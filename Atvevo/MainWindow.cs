@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using Atvevo.db;
@@ -221,7 +222,9 @@ namespace Atvevo
         }
         private void OnShowListButtonClick(object sender, EventArgs e) {
             var supplier = ((Button)sender).Tag as Supplier;
-            new SupplyArrivalsList(supplier, _databaseConnection);
+            Task.Run(() => {
+                Application.Run(new SupplyArrivalsList(supplier, _databaseConnection));
+            });
         }
         private void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, Supplier supplier)
         {
