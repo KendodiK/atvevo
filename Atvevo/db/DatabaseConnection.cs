@@ -292,12 +292,12 @@ namespace Atvevo.db {
             }
             return result.ToArray();
         }
-        public SupplyArrival[] GetBySupplierAndArrivalTime(Supplier model, long after = 0) {
+        public SupplyArrival[] GetByArrivalTime(long after = 0) {
             if (TableEntriesCount() == 0) {
                 return Array.Empty<SupplyArrival>();
             }
             List<SupplyArrival> result = new List<SupplyArrival>();
-            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE supplier_id = {model.Id} AND arrival_time >= {after};");
+            var queryResult = _connection.ExecuteWithMultipleReturn($"SELECT * FROM {TableName} WHERE arrival_time >= {after};");
             while (queryResult.Read()) {
                 Dictionary<string, string> values = new Dictionary<string, string>();
                 for (int i = 0; i < typeof(SupplyArrival).GetProperties().Length; i++) {
@@ -305,9 +305,10 @@ namespace Atvevo.db {
                 }
                 result.Add(new SupplyArrival() {
                     Id = Convert.ToInt32(values["id"]),
+                    SupplierId = Convert.ToInt32(values["supplier_id"]),
                     ProductId = Convert.ToInt32(values["product_id"]),
                     ArrivalTime = Convert.ToInt64(values["arrival_time"]).FromUnixTimestamp(),
-                    Quantity = Convert.ToInt32(values["price"]),
+                    Quantity = Convert.ToInt32(values["quantity"]),
                 });
             }
             return result.ToArray();
