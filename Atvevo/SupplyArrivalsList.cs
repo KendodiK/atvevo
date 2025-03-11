@@ -8,14 +8,14 @@ using Atvevo.db;
 namespace Atvevo {
     enum ArrivalTimeRange { Day, Week, Month, All }
     public partial class SupplyArrivalsList : Form {
-        private DatabaseConnection _databaseConnection;
+        private readonly DatabaseConnection _databaseConnection;
         
-        private FlowLayoutPanel _list = new FlowLayoutPanel();
-        private Panel _rightMenu = new Panel();
-        private Button _selectDay = new Button();
-        private Button _selectWeek = new Button();
-        private Button _selectMonth = new Button();
-        private Button _selectAll = new Button();
+        private readonly FlowLayoutPanel _list = new FlowLayoutPanel();
+        private readonly Panel _rightMenu = new Panel();
+        private readonly Button _selectDay = new Button();
+        private readonly Button _selectWeek = new Button();
+        private readonly Button _selectMonth = new Button();
+        private readonly Button _selectAll = new Button();
         public SupplyArrivalsList(DatabaseConnection databaseConnection) {
             _databaseConnection = databaseConnection;
             InitializeComponent();
@@ -63,7 +63,7 @@ namespace Atvevo {
                 panel.BackColor = Color.White;
             }
             else {
-                panel.BackColor = Color.LightBlue;
+                panel.BackColor = Color.Lavender;
             }
             Label supplier = new Label() {
                 Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId].Name,
@@ -86,7 +86,7 @@ namespace Atvevo {
             };
             panel.Controls.Add(product, 1, 0);
             Label arrivalTime = new Label {
-                Text = item.ArrivalTime.ToString("yyyy. M. d HH:mm"),
+                Text = item.ArrivalTime.ToString("HH:mm:ss"),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(0, 0),
                 Height = 50,
@@ -112,15 +112,17 @@ namespace Atvevo {
         }
         private Panel ListItemNextDate(DateTime date) {
             Panel panel = new Panel {
-                Size = new Size(_list.Width, 50),
+                Size = new Size(_list.Width, 30),
                 Location = new Point(0, 0),
                 ForeColor = Color.Black,
-                BackColor = Color.Aquamarine
+                BackColor = Color.Plum
             };
             Label dateLabel = new Label {
-                Text = date.ToString("yyyy. M."),
+                Text = date.ToString("yyyy. m. d dddd"),
+                Font = new Font(FontFamily.GenericSansSerif, 13),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(0, 0),
+                Height = 30,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
                 ForeColor = Color.Black
@@ -135,12 +137,16 @@ namespace Atvevo {
             _rightMenu.Dock = DockStyle.Right;
             _rightMenu.Width = 100;
             _rightMenu.Height = Height;
-            _rightMenu.BackColor = Color.Blue;
+            _rightMenu.BackColor = Color.Lavender;
+            _rightMenu.Font = new Font(FontFamily.GenericSansSerif, 12);
 
             _selectMonth.Tag = ArrivalTimeRange.Month;
             _selectMonth.Size = new Size(80, 40);
             _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24));
             _selectMonth.Text = "Hónap";
+            _selectMonth.FlatStyle = FlatStyle.Flat;
+            _selectMonth.BackColor = Color.Indigo;
+            _selectMonth.ForeColor = Color.Lavender;
             _selectMonth.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectMonth);
 
@@ -148,6 +154,9 @@ namespace Atvevo {
             _selectWeek.Size = new Size(80, 40);
             _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 50);
             _selectWeek.Text = "Hét";
+            _selectWeek.FlatStyle = FlatStyle.Flat;
+            _selectWeek.BackColor = Color.Indigo;
+            _selectWeek.ForeColor = Color.Lavender;
             _selectWeek.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectWeek);
 
@@ -155,6 +164,9 @@ namespace Atvevo {
             _selectDay.Size = new Size(80, 40);
             _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 100);
             _selectDay.Text = "Nap";
+            _selectDay.FlatStyle = FlatStyle.Flat;
+            _selectDay.BackColor = Color.Indigo;
+            _selectDay.ForeColor = Color.Lavender;
             _selectDay.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectDay);
 
@@ -162,6 +174,9 @@ namespace Atvevo {
             _selectAll.Size = new Size(80, 40);
             _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 150);
             _selectAll.Text = "Összes";
+            _selectAll.FlatStyle = FlatStyle.Flat;
+            _selectAll.BackColor = Color.Indigo;
+            _selectAll.ForeColor = Color.Lavender;
             _selectAll.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectAll);
 
