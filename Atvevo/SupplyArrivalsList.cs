@@ -19,6 +19,7 @@ namespace Atvevo {
         public SupplyArrivalsList(DatabaseConnection databaseConnection) {
             _databaseConnection = databaseConnection;
             InitializeComponent();
+            MinimumSize = new Size(700, 400);
             BuildMenu();
             BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime());
             Resize += ResizeForm;
@@ -27,6 +28,7 @@ namespace Atvevo {
             _list.Dock = DockStyle.Fill;
             _list.BackColor = Color.Crimson;
             _list.FlowDirection = FlowDirection.TopDown;
+            _list.AutoScroll = true;
 
             if (listItems.Length > 0) {
                 var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
@@ -55,8 +57,28 @@ namespace Atvevo {
             else {
                 panel.BackColor = Color.DimGray;
             }
+            Label supplier = new Label() {
+                Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId].Name,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(width / 5, 100),
+                Location = new Point(0, 0),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black
+            };
+            panel.Controls.Add(supplier);
+            Label product = new Label() {
+                Text = _databaseConnection.ProductsTable.Read()[item.ProductId].Name,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(width / 5, 100),
+                Location = new Point(0, 0),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black
+            };
+            panel.Controls.Add(product);
             Label arrivalTime = new Label {
-                Text = item.ArrivalTime.ToString("yyyy-M-d dddd"),
+                Text = item.ArrivalTime.ToString("yyyy. M. dddd, HH:mm"),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Size = new Size(width / 5, 100),
                 Location = new Point(0, 0),
@@ -65,8 +87,14 @@ namespace Atvevo {
                 ForeColor = Color.Black
             };
             panel.Controls.Add(arrivalTime);
-            Label product = new Label {
-
+            Label quantity = new Label {
+                Text = item.Quantity.ToString() + " kg",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Size = new Size(width / 5, 100),
+                Location = new Point(0, 0),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black
             };
             return panel;
         }
@@ -81,28 +109,28 @@ namespace Atvevo {
 
             _selectMonth.Tag = ArrivalTimeRange.Month;
             _selectMonth.Size = new Size(80, 40);
-            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 100);
+            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24));
             _selectMonth.Text = "Hónap";
             _selectMonth.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectMonth);
 
             _selectWeek.Tag = ArrivalTimeRange.Week;
             _selectWeek.Size = new Size(80, 40);
-            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 150);
+            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 50);
             _selectWeek.Text = "Hét";
             _selectWeek.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectWeek);
 
             _selectDay.Tag = ArrivalTimeRange.Day;
             _selectDay.Size = new Size(80, 40);
-            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 200);
+            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 100);
             _selectDay.Text = "Nap";
             _selectDay.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectDay);
 
             _selectAll.Tag = ArrivalTimeRange.All;
             _selectAll.Size = new Size(80, 40);
-            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 250);
+            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 150);
             _selectAll.Text = "Összes";
             _selectAll.Click += OnListFilterChanged;
             _rightMenu.Controls.Add(_selectAll);
@@ -131,10 +159,11 @@ namespace Atvevo {
             }
         }
         private void ResizeForm(object sender, EventArgs e) {
-            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 100);
-            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 150);
-            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 200);
-            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, Height / 3 + 250);
+            _rightMenu.Width = 100;
+            _selectMonth.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24));
+            _selectWeek.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 50);
+            _selectDay.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 100);
+            _selectAll.Location = new Point(_rightMenu.Width / 2 - 80 / 2, (int)(Height * 0.24) + 150);
         }
     }
 }
