@@ -9,7 +9,6 @@ namespace Atvevo {
     enum ArrivalTimeRange { Day, Week, Month, All }
     public partial class SupplyArrivalsList : Form {
         private DatabaseConnection _databaseConnection;
-        private Supplier _supplier;
         
         private FlowLayoutPanel _list = new FlowLayoutPanel();
         private Panel _rightMenu = new Panel();
@@ -17,13 +16,12 @@ namespace Atvevo {
         private Button _selectWeek = new Button();
         private Button _selectMonth = new Button();
         private Button _selectAll = new Button();
-        public SupplyArrivalsList(Supplier supplier, DatabaseConnection databaseConnection) {
-            _supplier = supplier;
+        public SupplyArrivalsList(DatabaseConnection databaseConnection) {
             _databaseConnection = databaseConnection;
             InitializeComponent();
             BuildMenu();
-            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime(supplier));
-            SizeChanged += ResizeForm;
+            BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime());
+            Resize += ResizeForm;
         }
         private void BuildList(SupplyArrival[] listItems) {
             _list.Dock = DockStyle.Fill;
@@ -76,7 +74,7 @@ namespace Atvevo {
             return new Panel{BackColor = Color.Green};
         }
         private void BuildMenu() {
-            _rightMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _rightMenu.Dock = DockStyle.Right;
             _rightMenu.Width = 100;
             _rightMenu.Height = Height;
             _rightMenu.BackColor = Color.Blue;
@@ -115,7 +113,7 @@ namespace Atvevo {
             var btn = (Button)sender;
             Controls.Remove(_list);
             var unixTimeRange = TimeRangeHelper((ArrivalTimeRange)btn.Tag).ToUnixTimestamp();
-            BuildList(_databaseConnection.SupplyArrivalsTable.GetBySupplierAndArrivalTime(_supplier, unixTimeRange));
+            BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime(unixTimeRange));
         }
         private DateTime TimeRangeHelper(ArrivalTimeRange timeRange) {
             var current = DateTime.Now;
