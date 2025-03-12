@@ -9,7 +9,8 @@ namespace Atvevo {
     enum ArrivalTimeRange { Day, Week, Month, All }
     public partial class SupplyArrivalsList : Form {
         private readonly DatabaseConnection _databaseConnection;
-        
+
+        private readonly Label _noContent = new Label();
         private readonly FlowLayoutPanel _list = new FlowLayoutPanel();
         private readonly Panel _rightMenu = new Panel();
         private readonly Button _selectDay = new Button();
@@ -45,6 +46,13 @@ namespace Atvevo {
                     }
                 }
                 Controls.Add(_list);
+            }
+            else {
+                _noContent.Size = new Size(Width - _rightMenu.Width - 20, Height);
+                _noContent.TextAlign = ContentAlignment.MiddleCenter;
+                _noContent.Text = "NEM VOLT BEVÉTELEZÉS AZ ADATT IDŐINTERVALLUMBAN";
+                _noContent.Font = new Font(FontFamily.GenericSansSerif, 15);
+                Controls.Add(_noContent);
             }
         }
         private Panel ListItem(SupplyArrival item, int index) {
@@ -186,6 +194,7 @@ namespace Atvevo {
             var btn = (Button)sender;
             _list.Controls.Clear();
             Controls.Remove(_list);
+            Controls.Remove(_noContent);
             var unixTimeRange = TimeRangeHelper((ArrivalTimeRange)btn.Tag).ToUnixTimestamp();
             BuildList(_databaseConnection.SupplyArrivalsTable.GetByArrivalTime(unixTimeRange));
         }
