@@ -39,7 +39,7 @@ namespace Atvevo.db {
             _connection.Open();
             SuppliersTable = new SuppliersTable(this, withDummyData);
             ProductsTable = new ProductsTable(this, withDummyData);
-            SupplyArrivalsTable = new SupplyArrivalsTable(this);
+            SupplyArrivalsTable = new SupplyArrivalsTable(this, withDummyData);
             SupplierProductConnectionTable = new SupplierProductConnectionTable(this, withDummyData);
         }
         private string DbConnection() {
@@ -265,12 +265,15 @@ namespace Atvevo.db {
     }
     public class SupplyArrivalsTable : DatabaseTable<SupplyArrival> {
         public const string TableName = "supply_arrivals";
-        public SupplyArrivalsTable(DatabaseConnection connection) {
+        public SupplyArrivalsTable(DatabaseConnection connection, bool withDummyData) {
             _connection = connection;
             _tableName = TableName;
             string createSuppliersTable =
                 $"CREATE TABLE IF NOT EXISTS {TableName} (id INTEGER PRIMARY KEY, supplier_id INTEGER NOT NULL, product_id INTEGER NOT NULL, arrival_time NUMERIC NOT NULL, quantity INTEGER NOT NULL);";
             _connection.ExecuteWithoutReturn(createSuppliersTable);
+            if (withDummyData) {
+                WithDummyData(Path.Combine(DatabaseConnection.WorkDir, "atvesz.csv"));
+            }
         }
         public override SupplyArrival[] Read() {
             if (TableEntriesCount() == 0) {

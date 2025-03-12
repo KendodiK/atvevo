@@ -28,8 +28,12 @@ namespace Atvevo {
         private void BuildList(SupplyArrival[] listItems) {
             _list.Size = new Size(Width - _rightMenu.Width - 20, Height);
             _list.FlowDirection = FlowDirection.TopDown;
-            _list.VerticalScroll.Enabled = true;
-
+            _list.Dock = DockStyle.Left;
+            _list.WrapContents = false;
+            _list.HorizontalScroll.Maximum = 0;
+            _list.AutoScroll = false;
+            _list.VerticalScroll.Visible = false;
+            _list.AutoScroll = true;
             if (listItems.Length > 0) {
                 var firstDate = listItems.Select(x => x.ArrivalTime).ToArray()[0];
                 var year = firstDate.Year;
@@ -37,13 +41,13 @@ namespace Atvevo {
                 var day = firstDate.Day;
                 _list.Controls.Add(ListItemNextDate(firstDate));
                 for (int i = 0; i < listItems.Length; i++) {
-                    _list.Controls.Add(ListItem(listItems[i], i));
                     if (listItems[i].ArrivalTime.Year != year || listItems[i].ArrivalTime.Month != month || listItems[i].ArrivalTime.Day != day) {
                         year = listItems[i].ArrivalTime.Year;
                         month = listItems[i].ArrivalTime.Month;
                         day = listItems[i].ArrivalTime.Day;
                         _list.Controls.Add(ListItemNextDate(listItems[i].ArrivalTime));
                     }
+                    _list.Controls.Add(ListItem(listItems[i], i));
                 }
                 Controls.Add(_list);
             }
@@ -126,10 +130,11 @@ namespace Atvevo {
                 BackColor = Color.Plum
             };
             Label dateLabel = new Label {
-                Text = date.ToString("yyyy. m. d dddd"),
+                Text = date.ToString("yyyy MMMM dd"),
                 Font = new Font(FontFamily.GenericSansSerif, 13),
-                TextAlign = ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleLeft,
                 Location = new Point(0, 0),
+                Width = _list.Width - 10,
                 Height = 30,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.Transparent,
