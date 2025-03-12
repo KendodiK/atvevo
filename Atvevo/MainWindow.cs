@@ -86,6 +86,7 @@ namespace Atvevo
         }
         
         private static ComboBox _supplierDropdown;
+        private static ComboBox _fruitDropdown;
         private static Panel selectElementsPanel;
         private static TextBox inName;
         private static TextBox inCity;
@@ -107,6 +108,7 @@ namespace Atvevo
         private static List<FruitSelectElement> selectElements = new List<FruitSelectElement>();
 
         private DatabaseConnection _databaseConnection;
+        private Supplier _activeSupplier;
         public MainWindow()
         {
             InitializeComponent();
@@ -114,7 +116,7 @@ namespace Atvevo
             _databaseConnection = new DatabaseConnection(true);
             Font = new System.Drawing.Font("Microsoft Sans Serif", 13);
             Width = 800;
-            Height = 500;
+            Height = 550;
             BuildForm(this);
             FormClosing += (sender, args) => { _databaseConnection.DatabaseDisconnect(); };
         }
@@ -122,7 +124,7 @@ namespace Atvevo
         private void BuildForm(Form mainWin)
         {
             _supplierDropdown = new ComboBox { Parent = mainWin, Width = 130, Height = 20, Top = 10, Left = 20, DropDownStyle = ComboBoxStyle.DropDownList, };
-            selectElementsPanel = new Panel { Parent = mainWin, Width = 390, Height = 300, Top = 160, Left = 20, AutoScroll = true};
+            selectElementsPanel = new Panel { Parent = mainWin, Width = 390, Height = 300, Top = 210, Left = 20, AutoScroll = true};
             selectElementsPanel.VerticalScroll.Enabled = true;
             
             int supplierTop = 30;
@@ -137,22 +139,35 @@ namespace Atvevo
             Label phoneNum = new Label 
                 { Parent = mainWin, Width = 80, Height = 20, Top = supplierTop * 4 + 10, Left = 420, Text = "Tel. sz.",};
 
-            addFruitPanel = new Panel { Parent = mainWin, Width = 380, Height = 110, Top = 40, Left = 20, Visible = false};
+            addFruitPanel = new Panel { Parent = mainWin, Width = 380, Height = 160, Top = 40, Left = 20, Visible = false};
             Label fruitName = new Label
                 { Parent = addFruitPanel, Width = 50, Height = 25, Left = 30, Text = "Fajta",};
             Label fruitCategory = new Label
                 { Parent = addFruitPanel, Width = 90, Left = 120, Height = 25, Text = "Gyömölcs típus",};
             Label price = new Label 
                 { Parent = addFruitPanel, Width = 70, Left = 210, Height = 25, Text = "Kilóár",};
-            inFruitCategory = new TextBox { Parent = addFruitPanel, Width = 120, Top = 30, };
+            inFruitCategory = new TextBox { Parent = addFruitPanel, Width = 120, Top = 30, Tag = ""};
             inFruitName = new TextBox { Parent = addFruitPanel, Width = 70, Left = 130, Top = 30, };
             inFruitPrice = new TextBox { Parent = addFruitPanel, Width = 50, Left = 210, Top = 30, };
+            
+            _fruitDropdown = new ComboBox
+                { Parent = addFruitPanel, Width = 270, Height = 20, Top = 70, DropDownStyle = ComboBoxStyle.DropDownList,};
+            var fruits = _databaseConnection.ProductsTable.Read();
+            int i = 0;
+            _fruitDropdown.Items.Add("Már rögzített fajta kiválasztása");
+            _fruitDropdown.SelectedIndex = 0;
+            foreach (Product fruitElement in fruits)
+            {
+                _fruitDropdown.Items.Add(fruitElement.Name + $" ({fruitElement.Category})");
+                i++;
+            }
+            _fruitDropdown.SelectedIndexChanged += (sender, args) => FruitDropdown_SelectedIndexChanged(sender, args, fruits);
             addFruitButton = new Button 
-                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 60, Text = "Gyümölcs hozzáadása"};
+                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 110, Text = "Gyümölcs hozzáadása"};
                 addFruitButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                addFruitButton.Click += AddFruitButton_Click;
+                addFruitButton.Click += (sender, args) => AddFruitButton_Click(sender, args);
 
-                int leftCounted = name.Left + name.Width + 10;
+            int leftCounted = name.Left + name.Width + 10;
             inName = new TextBox 
                 { Parent = mainWin, Width = 200, Height = 20, Top = 10, Left = leftCounted };
             leftCounted = city.Left + city.Width + 10;
@@ -201,60 +216,108 @@ namespace Atvevo
                     
                     
             var suppliers = this._databaseConnection.SuppliersTable.Read();
+            string[] suppliersNames = new string[suppliers.Length];
+            i = 0;
+            _supplierDropdown.Items.Add("---------");
+            _supplierDropdown.SelectedIndex = 0;
             foreach (var supplier in suppliers)
             {
                 _supplierDropdown.Items.Add(supplier.Name);
+                suppliersNames[i] = supplier.Name;
+                i++;
             }
             _supplierDropdown.SelectedIndexChanged += 
                 (sender, args) => SupplierDropdown_SelectedIndexChanged(
-                    sender, args, suppliers[_supplierDropdown.SelectedIndex]);
+                    sender, args, suppliers[_supplierDropdown.SelectedIndex > 0 ? _supplierDropdown.SelectedIndex - 1 : 0]);
+            
+            addSupplierButton = new Button
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 420, Text = "Beszállító \nhozzáadása",};
+            addSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
+            addSupplierButton.Click += (sender, args) => addNewSupplier(sender, args, suppliersNames);
         }
         private void SupplierDropdown_SelectedIndexChanged(object sender, EventArgs e, Supplier supplier)
         {
             selectElements.Clear();
             selectElementsPanel.Controls.Clear();
-            addFruitPanel.Visible = true;
-            addSupplierButton.Enabled = false;
-            changeSupplierButton.Enabled = true;
-            changeSupplierButton.Click += (senderBtn, args) => changeSupplier(senderBtn, args, supplier);
-            deleteSupplierButton.Enabled = true;
-            deleteSupplierButton.Click += (senderBtn, args) => deleteSupplier(senderBtn, args, supplier);
-            ComboBox suppliers = (ComboBox)sender;
-            Product[] fruits = _databaseConnection.ProductsTable.GetBySupplier(supplier);
-            for (int i = 0; i < fruits.Length; i++)
+            if (_supplierDropdown.Items[_supplierDropdown.SelectedIndex] != "---------")
             {
-                FruitSelectElement fruitSelectElement = new FruitSelectElement(
-                    10,  i * 60 , fruits[i], selectElementsPanel);
-                selectElements.Add(fruitSelectElement);
-                Button delButton = new Button
+                _activeSupplier = supplier;
+                addFruitPanel.Visible = true;
+                addSupplierButton.Enabled = false;
+                changeSupplierButton.Enabled = true;
+                changeSupplierButton.Click += (senderBtn, args) => changeSupplier(senderBtn, args);
+                deleteSupplierButton.Enabled = true;
+                deleteSupplierButton.Click += (senderBtn, args) => deleteSupplier(senderBtn, args);
+                ComboBox suppliers = (ComboBox)sender;
+                Product[] fruits = _databaseConnection.ProductsTable.GetBySupplier(supplier);
+                for (int i = 0; i < fruits.Length; i++)
                 {
-                    Parent = selectElementsPanel,
-                    Width = 30,
-                    Height = 30,
-                    Top = i * 60,
-                    Left = 340,
-                    Tag = i,
-                    Text = "X",
-                };
-                delButton.Click += (senderBtn, args) => DeleteFruitButton_Click(senderBtn, args, supplier);
+                    FruitSelectElement fruitSelectElement = new FruitSelectElement(
+                        10, i * 60, fruits[i], selectElementsPanel);
+                    selectElements.Add(fruitSelectElement);
+                    Button delButton = new Button
+                    {
+                        Parent = selectElementsPanel,
+                        Width = 30,
+                        Height = 30,
+                        Top = i * 60,
+                        Left = 340,
+                        Tag = i,
+                        Text = "X",
+                    };
+                    delButton.Click += (senderBtn, args) => DeleteFruitButton_Click(senderBtn, args);
+                    writeSupplierData();
+                    saveButton.Click += saveButton_Click;
+                }
             }
-            writeSupplierData(supplier);
-            saveButton.Click += saveButton_Click;
+            else
+            {
+                   clearSupplierData();
+                   addFruitPanel.Visible = false;
+                   addSupplierButton.Enabled = true;
+                   changeSupplierButton.Enabled = false;
+                   deleteSupplierButton.Enabled = false;
+            }
         }
 
-        private void writeSupplierData(Supplier supplier)
+        private void writeSupplierData()
         {
-            inName.Text = supplier.Name;
-            inCity.Text = supplier.City;
-            inZipCode.Text = supplier.ZipCode;
-            inStreet.Text = supplier.Street;
-            inCounty.Text = supplier.County;
-            inHouseNumber.Text = supplier.HouseNumber.ToString();
-            inPhone.Text = supplier.Phone;
+            inName.Text = _activeSupplier.Name;
+            inCity.Text = _activeSupplier.City;
+            inZipCode.Text = _activeSupplier.ZipCode;
+            inStreet.Text = _activeSupplier.Street;
+            inCounty.Text = _activeSupplier.County;
+            inHouseNumber.Text = _activeSupplier.HouseNumber.ToString();
+            inPhone.Text = _activeSupplier.Phone;
         }
 
-        private void addNewSupplier(object sender, EventArgs e)
+        private void clearSupplierData()
         {
+            inName.Text = "";
+            inCity.Text = "";
+            inZipCode.Text = "";
+            inStreet.Text = "";
+            inHouseNumber.Text = "";
+            inPhone.Text = "";
+            inCounty.Text = "";
+        }
+
+        private void addNewSupplier(object sender, EventArgs e, string[] suppliersNames)
+        {
+            bool notEmty = false;
+            foreach (string supplierName in suppliersNames)
+            {
+                if (supplierName == inName.Text)
+                {
+                    notEmty = true;
+                }
+            }
+
+            if (notEmty)
+            {
+                clearSupplierData();
+            }
+            
             if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
                 inHouseNumber.Text == "" || inPhone.Text == "")
             {
@@ -275,51 +338,56 @@ namespace Atvevo
                 {
                     MessageBox.Show("Sikeresen hozzáadva!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _supplierDropdown.Items.Add(supplier.Name);   
-                    _supplierDropdown.SelectedIndex = _supplierDropdown.Items.Count - 1;
+                    _supplierDropdown.SelectedIndex = _supplierDropdown.Items.Count;
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 }
             }
         }
 
-        private void changeSupplier(object sender, EventArgs e, Supplier supplier)
+        private void changeSupplier(object sender, EventArgs e)
         {
             if (inName.Text == "" || inCity.Text == "" || inZipCode.Text == "" || inStreet.Text == "" ||
-                inHouseNumber.Text == "" || inPhone.Text == "")
+                inHouseNumber.Text == "" || inPhone.Text == "" || inCounty.Text == "")
             {
                 AddError();
             }
             else
             {
-                supplier.Name = inName.Text;
-                supplier.City = inCity.Text;
-                supplier.ZipCode = inZipCode.Text;
-                supplier.Street = inStreet.Text;
-                supplier.HouseNumber = Convert.ToByte(inHouseNumber.Text);
-                supplier.Phone = inPhone.Text;
+                _activeSupplier.Name = inName.Text;
+                _activeSupplier.City = inCity.Text;
+                _activeSupplier.ZipCode = inZipCode.Text;
+                _activeSupplier.Street = inStreet.Text;
+                _activeSupplier.HouseNumber = Convert.ToByte(inHouseNumber.Text);
+                _activeSupplier.Phone = inPhone.Text;
 
-                if (_databaseConnection.SuppliersTable.Update(supplier))
+                if (_databaseConnection.SuppliersTable.Update(_activeSupplier))
                 {
                     MessageBox.Show("Sikeresen módosítva!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 } 
             }
         }
 
-        private void deleteSupplier(object sender, EventArgs e, Supplier supplier)
+        private void deleteSupplier(object sender, EventArgs e)
         {
-            if (_databaseConnection.SuppliersTable.Delete(supplier))
+            if (_databaseConnection.SuppliersTable.Delete(_activeSupplier))
             {
                 MessageBox.Show("Sikeresen törölve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _supplierDropdown.Items.Remove(_activeSupplier.Name);
+                _supplierDropdown.SelectedIndex = 0;
+                selectElements.Clear();
+                selectElementsPanel.Controls.Clear();
+                addFruitPanel.Visible = false;
             }
             else
             {
-                ErrorMsg();
+                UnknownErrorMsg();
             } 
         }
 
@@ -334,7 +402,7 @@ namespace Atvevo
                             new SupplyArrival
                             {
                                 ArrivalTime = DateTime.Now,
-                                SupplierId = _supplierDropdown.SelectedIndex,
+                                SupplierId = _activeSupplier.Id,
                                 ProductId = products[0],
                                 Quantity = products[1]
 
@@ -349,7 +417,7 @@ namespace Atvevo
             }
         }
 
-        private void ErrorMsg()
+        private void UnknownErrorMsg()
         {
             MessageBox.Show("Nem várt hiba! Kérjük próbálja meg újra!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -359,6 +427,14 @@ namespace Atvevo
             MessageBox.Show("Minden mezőt közelező kitölteni!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        private void FruitDropdown_SelectedIndexChanged(object sender, EventArgs e, Product[] fruits)
+        {
+            inFruitCategory.Text = fruits[_fruitDropdown.SelectedIndex - 1].Name;
+            inFruitCategory.Tag = fruits[_fruitDropdown.SelectedIndex - 1].Id;
+            inFruitName.Text = fruits[_fruitDropdown.SelectedIndex - 1].Category;
+            inFruitPrice.Text = fruits[_fruitDropdown.SelectedIndex - 1].Price.ToString();
+        }
+        
         private void AddFruitButton_Click(object sender, EventArgs e)
         {
             if (inFruitCategory.Text == "" || inFruitName.Text == "" || inFruitPrice.Text == "")
@@ -367,30 +443,48 @@ namespace Atvevo
             }
             else
             {
+                bool isNew = inFruitCategory.Tag == "";
                 Product fruit = new Product
                 {
-                    Category = inFruitCategory.Text,
-                    Name = inFruitName.Text,
-                    Price =  Convert.ToDouble(inFruitPrice.Text),
+                    Name = inFruitCategory.Text,
+                    Category = inFruitName.Text,
+                    Price = Convert.ToDouble(inFruitPrice.Text),
                 };
-                _databaseConnection.ProductsTable.Insert(fruit);
-                SupplierProductConnection connection = new SupplierProductConnection
+                int id;
+                if (isNew)
                 {
-                    ProductId = _databaseConnection.ProductsTable.TableEntriesCount(),
-                    SupplierId = _supplierDropdown.SelectedIndex + 1,
-                };
-                if (_databaseConnection.SupplierProductConnectionTable.Insert(connection))
-                {
-                    MessageBox.Show("Sikeresen mentve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    id = _databaseConnection.ProductsTable.TableEntriesCount();
+                    _databaseConnection.ProductsTable.Insert(fruit);
+
                 }
                 else
                 {
-                    ErrorMsg();
+                    id = Convert.ToInt32(inFruitCategory.Tag);
+                    _databaseConnection.ProductsTable.Update(fruit);
+                }
+                SupplierProductConnection connection = new SupplierProductConnection
+                {
+                    ProductId = id,
+                    SupplierId = _activeSupplier.Id,
+                };
+                if (_databaseConnection.SupplierProductConnectionTable.Insert(connection))
+                {
+                    MessageBox.Show("Sikeresen mentve!", "Sikeres", MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    SupplierDropdown_SelectedIndexChanged(null, null, _activeSupplier);
+                    inFruitCategory.Text = "";
+                    inFruitCategory.Tag = "";
+                    inFruitName.Text = "";
+                    inFruitPrice.Text = "";
+                }
+                else
+                {
+                    UnknownErrorMsg();
                 }
             }
         }
 
-        private void DeleteFruitButton_Click(object sender, EventArgs e, Supplier supplier)
+        private void DeleteFruitButton_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Biztos törölni akarja?", "Figyelmeztetés", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
@@ -398,17 +492,17 @@ namespace Atvevo
                 int index = Convert.ToInt32(delButton.Tag);
                 SupplierProductConnection connection = new SupplierProductConnection
                 {
-                    ProductId = _databaseConnection.ProductsTable.GetBySupplier(supplier)[index].Id,
-                    SupplierId = supplier.Id,
+                    ProductId = _databaseConnection.ProductsTable.GetBySupplier(_activeSupplier)[index].Id,
+                    SupplierId = _activeSupplier.Id,
                 };
                 if(_databaseConnection.SupplierProductConnectionTable.Delete(connection))
                 {
                     MessageBox.Show("Sikeresen törölve!", "Sikeres", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    SupplierDropdown_SelectedIndexChanged(null, null, supplier);
+                    SupplierDropdown_SelectedIndexChanged(null, null, _activeSupplier);
                 }
                 else
                 {
-                    ErrorMsg();
+                    UnknownErrorMsg();
                 }
             }
             else
