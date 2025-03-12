@@ -213,14 +213,13 @@ namespace Atvevo
             saveButton = new Button
                 { Parent = mainWin, Width = 150, Height = 30, Top = 10, Left = 160, Text = "Beszállítás mentése", Enabled = false};
                 saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
-                    
-                    
-            var suppliers = this._databaseConnection.SuppliersTable.Read();
+                
+            var suppliers = _databaseConnection.SuppliersTable.Read();
             string[] suppliersNames = new string[suppliers.Length];
             i = 0;
             _supplierDropdown.Items.Add("---------");
             _supplierDropdown.SelectedIndex = 0;
-            foreach (var supplier in suppliers)
+            foreach (Supplier supplier in suppliers)
             {
                 _supplierDropdown.Items.Add(supplier.Name);
                 suppliersNames[i] = supplier.Name;
@@ -443,7 +442,7 @@ namespace Atvevo
             }
             else
             {
-                bool isNew = inFruitCategory.Tag == "";
+                bool isNew = Convert.ToString(inFruitCategory.Tag) == "";
                 Product fruit = new Product
                 {
                     Name = inFruitCategory.Text,
@@ -453,14 +452,13 @@ namespace Atvevo
                 int id;
                 if (isNew)
                 {
-                    id = _databaseConnection.ProductsTable.TableEntriesCount();
                     _databaseConnection.ProductsTable.Insert(fruit);
-
+                    id = _databaseConnection.ProductsTable.TableEntriesCount();
                 }
                 else
                 {
-                    id = Convert.ToInt32(inFruitCategory.Tag);
                     _databaseConnection.ProductsTable.Update(fruit);
+                    id = Convert.ToInt32(inFruitCategory.Tag);
                 }
                 SupplierProductConnection connection = new SupplierProductConnection
                 {
