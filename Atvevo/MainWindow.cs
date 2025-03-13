@@ -80,6 +80,7 @@ namespace Atvevo
             private void addProduct(object sender, EventArgs e)
             {
                 saveButton.Enabled = true;
+                saveButton.BackColor = Color.Indigo;
                 products[0] = fruit.Id;
                 products[1] = (int)quantity.Value;
             }
@@ -117,6 +118,7 @@ namespace Atvevo
             Font = new System.Drawing.Font("Microsoft Sans Serif", 13);
             Width = 800;
             Height = 550;
+            BackColor = Color.Lavender;
             BuildForm(this);
             FormClosing += (sender, args) => { _databaseConnection.DatabaseDisconnect(); };
         }
@@ -163,7 +165,8 @@ namespace Atvevo
             }
             _fruitDropdown.SelectedIndexChanged += (sender, args) => FruitDropdown_SelectedIndexChanged(sender, args, fruits);
             addFruitButton = new Button 
-                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 110, Text = "Gyümölcs hozzáadása"};
+                { Parent = addFruitPanel, Width = 200, Height = 30, Left = 20, Top = 110, Text = "Gyümölcs hozzáadása",
+                    FlatStyle = FlatStyle.Flat,  BackColor = Color.Indigo, ForeColor = Color.Lavender,};
                 addFruitButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                 addFruitButton.Click += (sender, args) => AddFruitButton_Click(sender, args);
 
@@ -191,18 +194,21 @@ namespace Atvevo
 
             changeSupplierButton = new Button
                 { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 530, 
-                    Text = "Beszállító \nmódosítása", Enabled = false
+                    Text = "Beszállító \nmódosítása", BackColor = Color.FromArgb(214, 157, 255), ForeColor = Color.Lavender,
+                    FlatStyle = FlatStyle.Flat, Enabled = false
                 };
                 changeSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
 
             deleteSupplierButton = new Button
                 { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 640, 
-                    Text = "Beszállító \ntörlése", Enabled = false
+                    Text = "Beszállító \ntörlése", BackColor = Color.FromArgb(214, 157, 255), 
+                    FlatStyle = FlatStyle.Flat, ForeColor = Color.Lavender, Enabled = false
                 };
                 deleteSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
 
             showListButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése"};
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 8, Left = 540, Text = "Lista megjelenítése",
+                    FlatStyle = FlatStyle.Flat,  BackColor = Color.Indigo, ForeColor = Color.Lavender};
                 showListButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                 showListButton.Click += ((sender, args) => {
                     Task.Run(() => {
@@ -211,7 +217,8 @@ namespace Atvevo
                 });
 
             saveButton = new Button
-                { Parent = mainWin, Width = 150, Height = 30, Top = 10, Left = 160, Text = "Beszállítás mentése", Enabled = false};
+                { Parent = mainWin, Width = 150, Height = 30, Top = 10, Left = 160, Text = "Beszállítás mentése", FlatStyle = FlatStyle.Flat, 
+                  BackColor  = Color.FromArgb(214, 157, 255), ForeColor = Color.Lavender, Enabled = false};
                 saveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
                 
             var suppliers = _databaseConnection.SuppliersTable.Read();
@@ -230,7 +237,8 @@ namespace Atvevo
                     sender, args, suppliers[_supplierDropdown.SelectedIndex > 0 ? _supplierDropdown.SelectedIndex - 1 : 0]);
             
             addSupplierButton = new Button
-                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 420, Text = "Beszállító \nhozzáadása",};
+                { Parent = mainWin, Width = 100, Height = 60, Top = supplierTop * 5 + 10, Left = 420, 
+                    Text = "Beszállító \nhozzáadása", BackColor = Color.Indigo, ForeColor = Color.Lavender, FlatStyle = FlatStyle.Flat, };
             addSupplierButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11);
             addSupplierButton.Click += (sender, args) => addNewSupplier(sender, args, suppliersNames);
         }
@@ -243,9 +251,12 @@ namespace Atvevo
                 _activeSupplier = supplier;
                 addFruitPanel.Visible = true;
                 addSupplierButton.Enabled = false;
+                addSupplierButton.BackColor = Color.FromArgb(214, 157, 255);
                 changeSupplierButton.Enabled = true;
+                changeSupplierButton.BackColor = Color.Indigo;
                 changeSupplierButton.Click += (senderBtn, args) => changeSupplier(senderBtn, args);
                 deleteSupplierButton.Enabled = true;
+                deleteSupplierButton.BackColor = Color.Indigo;
                 deleteSupplierButton.Click += (senderBtn, args) => deleteSupplier(senderBtn, args);
                 ComboBox suppliers = (ComboBox)sender;
                 Product[] fruits = _databaseConnection.ProductsTable.GetBySupplier(supplier);
@@ -263,6 +274,9 @@ namespace Atvevo
                         Left = 340,
                         Tag = i,
                         Text = "X",
+                        FlatStyle = FlatStyle.Flat,
+                        BackColor = Color.Indigo,
+                        ForeColor = Color.Lavender,
                     };
                     delButton.Click += (senderBtn, args) => DeleteFruitButton_Click(senderBtn, args);
                     writeSupplierData();
@@ -274,8 +288,13 @@ namespace Atvevo
                    clearSupplierData();
                    addFruitPanel.Visible = false;
                    addSupplierButton.Enabled = true;
+                   addSupplierButton.BackColor = Color.Indigo;
                    changeSupplierButton.Enabled = false;
+                   changeSupplierButton.BackColor = Color.FromArgb(214, 157, 255);
                    deleteSupplierButton.Enabled = false;
+                   deleteSupplierButton.BackColor = Color.FromArgb(214, 157, 255);
+                   saveButton.Enabled = false;
+                   saveButton.BackColor = Color.FromArgb(214, 157, 255);
             }
         }
 
