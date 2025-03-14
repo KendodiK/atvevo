@@ -447,10 +447,20 @@ namespace Atvevo
 
         private void FruitDropdown_SelectedIndexChanged(object sender, EventArgs e, Product[] fruits)
         {
-            inFruitCategory.Text = fruits[_fruitDropdown.SelectedIndex - 1].Name;
-            inFruitCategory.Tag = fruits[_fruitDropdown.SelectedIndex - 1].Id;
-            inFruitName.Text = fruits[_fruitDropdown.SelectedIndex - 1].Category;
-            inFruitPrice.Text = fruits[_fruitDropdown.SelectedIndex - 1].Price.ToString();
+            if (_fruitDropdown.SelectedIndex > 0)
+            {
+                inFruitCategory.Text = fruits[_fruitDropdown.SelectedIndex - 1].Name;
+                inFruitCategory.Tag = fruits[_fruitDropdown.SelectedIndex - 1].Id;
+                inFruitName.Text = fruits[_fruitDropdown.SelectedIndex - 1].Category;
+                inFruitPrice.Text = fruits[_fruitDropdown.SelectedIndex - 1].Price.ToString(); 
+            }
+            else
+            {
+                inFruitCategory.Text = "";
+                inFruitCategory.Tag = "";
+                inFruitName.Text = "";
+                inFruitPrice.Text = "";
+            }
         }
         
         private void AddFruitButton_Click(object sender, EventArgs e)
