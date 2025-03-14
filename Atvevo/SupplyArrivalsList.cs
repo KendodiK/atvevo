@@ -78,7 +78,7 @@ namespace Atvevo {
                 panel.BackColor = Color.Lavender;
             }
             Label supplier = new Label() {
-                Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId].Name,
+                Text = _databaseConnection.SuppliersTable.Read()[item.SupplierId - 1].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(0, 0),
                 Height = 50,
@@ -88,7 +88,7 @@ namespace Atvevo {
             };
             panel.Controls.Add(supplier,0, 0);
             Label product = new Label() {
-                Text = _databaseConnection.ProductsTable.Read()[item.ProductId].Name,
+                Text = _databaseConnection.ProductsTable.Read()[item.ProductId - 1].Name,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(0, 0),
                 Height = 50,
